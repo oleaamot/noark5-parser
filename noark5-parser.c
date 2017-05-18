@@ -57,7 +57,6 @@ noark5_dataset_parser(Noark5Dataset *dataset, xmlDocPtr doc, xmlNodePtr cur)
   g_return_if_fail(cur != NULL);
   sub = cur->xmlChildrenNode;
   while (sub != NULL) {
-    fprintf(stdout, "New dataset found!\n");
     if ((!xmlStrcmp(sub->name, (const xmlChar *) "description"))) {
       dataset->name = (gchar *) xmlNodeListGetString(doc, sub->xmlChildrenNode, 1);
       fprintf(stdout, "Name = %s\n", dataset->name);
