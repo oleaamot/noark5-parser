@@ -37,7 +37,7 @@ static void
 noark5_description_parser(Noark5Dataset *dataset, xmlDocPtr doc, xmlNodePtr cur)
 {
     xmlNodePtr sub;
-    sub = cur;
+    sub = cur->xmlChildrenNode;
     while (sub != NULL) {
 	if ((!xmlStrcmp(sub->name, (const xmlChar *) "description"))) {
 	  fprintf(stdout,"Found a new description!\n");
@@ -59,7 +59,7 @@ noark5_dataset_parser(Noark5Dataset *dataset, xmlDocPtr doc, xmlNodePtr cur)
   while (sub != NULL) {
     if ((!xmlStrcmp(sub->name, (const xmlChar *) "description"))) {
       dataset->name = (gchar *) xmlNodeListGetString(doc, sub->xmlChildrenNode, 1);
-      fprintf(stdout, "Name = %s\n", dataset->name);
+      fprintf(stdout, "description = %s\n", dataset->name);
       noark5_description_parser(dataset, doc, cur);
     }
     sub = sub->next;
