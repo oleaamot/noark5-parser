@@ -96,7 +96,6 @@ int main (int argc, char **argv)
   Noark5Dataset *dataset, *curr;
   Noark5Reference *reference;
   Noark5DataObjects *dataObjects;
-  
   if (argc > 1) {
     doc = xmlReadFile(argv[1], NULL, 0);
     if (doc == NULL) {
@@ -116,13 +115,9 @@ int main (int argc, char **argv)
       return 2;
     }
     curr = g_new0(Noark5Dataset, 1);
-	
     curr->name = (gchar *) xmlGetProp(cur, (const xmlChar *)"name");
-
     printf("%s\n", curr->name);
-
     sub = cur->xmlChildrenNode;
-      
     while (sub != NULL) {
       if ((!xmlStrcmp(sub->name, (const xmlChar *) "dataset"))) {
 	curr->reference = g_new0(Noark5Reference, 1);
@@ -140,5 +135,3 @@ int main (int argc, char **argv)
   }
   return 0;
 }
-
-  
