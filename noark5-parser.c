@@ -28,6 +28,16 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 
+typedef struct _Noark5DataObject {
+  char *name;
+} Noark5DataObject;
+
+typedef struct _Noark5DataObjects {
+  Noark5DataObject *curr;
+  Noark5DataObject *prev;
+  Noark5DataObject *next;
+} Noark5DataObjects;
+
 typedef struct _Noark5Reference {
   char *recordCreator;
   char *systemType;
@@ -39,32 +49,41 @@ typedef struct _Noark5Dataset {
   char *name;
   char *description;
   Noark5Reference *reference;
+  Noark5DataObjects *dataObjects;
 } Noark5Dataset;
+
+static void
+noark5_dataobjects_parser(Noark5Dataset *dataset, xmlDocPtr doc, xmlNodePtr cur)
+{
+  xmlNodePtr sub;
+  sub = cur->xmlChildrenNode;
+  while (sub != NULL) {
+    if ((!xmlStrcmp(sub->name, (const xmlChar *) "dataobject"))) {
+      dataset->dataObjects->prev = dataset->dataObjects->curr;
+      dataset->dataObjects->curr = g_new0(Noark5DataObject, 1);
+      fprintf(stdout,"Found new dataobject!\n");
+    }
+    sub = sub->next;    
+  }
+}
 
 static void
 noark5_reference_parser(Noark5Dataset *dataset, xmlDocPtr doc, xmlNodePtr cur)
 {
   xmlNodePtr sub;
-}
-
-static void
-noark5_dataset_parser(Noark5Dataset *dataset, xmlDocPtr doc, xmlNodePtr cur)
-{
-  xmlNodePtr sub;
-  g_return_if_fail(dataset != NULL);
-  g_return_if_fail(doc != NULL);
-  g_return_if_fail(cur != NULL);
   sub = cur->xmlChildrenNode;
   while (sub != NULL) {
-    printf("DEBUG: %s\n", sub->name);
-    if ((!xmlStrcmp(sub->name, (const xmlChar *) "dataset"))) {
-      dataset->name = (gchar *) xmlNodeListGetString(doc, sub->xmlChildrenNode, 1);
-      fprintf(stdout, "text = %s\n", dataset->name);
-      noark5_reference_parser(dataset, doc, cur);
+    if ((!xmlStrcmp(sub->name, (const xmlChar *) "reference"))) {
+      dataset->reference = g_new0(Noark5Reference, 1);
+      fprintf(stdout,"Found new reference!\n");
+    }
+    if ((!xmlStrcmp(sub->name, (const xmlChar *) "dataObjects"))) {
+      dataset->dataObjects = g_new0(Noark5DataObjects, 1);
+      fprintf(stdout,"Found new dataObjects!\n");
+      noark5_dataobjects_parser(dataset, doc, sub);
     }
     sub = sub->next;
   }
-  return;
 }
 
 int main (int argc, char **argv)
@@ -74,7 +93,8 @@ int main (int argc, char **argv)
   xmlNodePtr sub = NULL;
   Noark5Dataset *dataset, *curr;
   Noark5Reference *reference;
-   
+  Noark5DataObjects *dataObjects;
+  
   if (argc > 1) {
     doc = xmlReadFile(argv[1], NULL, 0);
     if (doc == NULL) {
@@ -99,17 +119,20 @@ int main (int argc, char **argv)
 
     printf("%s\n", curr->name);
 
-#if 0
+    sub = cur->xmlChildrenNode;
+      
     while (sub != NULL) {
       if ((!xmlStrcmp(sub->name, (const xmlChar *) "dataset"))) {
-	curr->name = "dataset";
-	fprintf(stdout,"Found a new dataset!\n");
-	curr->name = (gchar *) xmlNodeListGetString(doc, sub->xmlChildrenNode, 1);
-	noark5_dataset_parser(curr, doc, cur);
+	curr->reference = g_new0(Noark5Reference, 1);
+	fprintf(stdout,"Found new dataset!\n");
+	noark5_reference_parser(curr, doc, sub);
       }
       sub = sub->next;
     }
-#endif
+    free(curr->dataObjects);
+    free(curr->reference);
+    free(curr->name);
+    free(curr);
   } else {
     fprintf(stdout, "noark5-parser FILE\n");
   }
