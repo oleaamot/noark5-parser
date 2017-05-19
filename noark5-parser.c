@@ -58,7 +58,7 @@ noark5_dataobjects_parser(Noark5Dataset *dataset, xmlDocPtr doc, xmlNodePtr cur)
   xmlNodePtr sub;
   sub = cur->xmlChildrenNode;
   while (sub != NULL) {
-    if ((!xmlStrcmp(sub->name, (const xmlChar *) "dataobject"))) {
+    if ((!xmlStrcmp(sub->name, (const xmlChar *) "dataObject"))) {
       dataset->dataObjects->prev = dataset->dataObjects->curr;
       dataset->dataObjects->curr = g_new0(Noark5DataObject, 1);
       fprintf(stdout,"Found new dataobject!\n");
