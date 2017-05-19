@@ -28,24 +28,23 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 
-typedef struct _Noark5Info {
+typedef struct _Noark5Reference {
+  char *recordCreator;
+  char *systemType;
+  char *systemName;
+  char *archive;
+} Noark5Reference;
+
+typedef struct _Noark5Dataset {
   char *name;
   char *description;
+  Noark5Reference *reference;
 } Noark5Dataset;
 
 static void
-noark5_description_parser(Noark5Dataset *dataset, xmlDocPtr doc, xmlNodePtr cur)
+noark5_reference_parser(Noark5Dataset *dataset, xmlDocPtr doc, xmlNodePtr cur)
 {
-    xmlNodePtr sub;
-    sub = cur->xmlChildrenNode;
-    while (sub != NULL) {
-	if ((!xmlStrcmp(sub->name, (const xmlChar *) "description"))) {
-	  fprintf(stdout,"Found a new description!\n");
-	  dataset->description = (gchar *) xmlNodeListGetString(doc, sub->xmlChildrenNode, 1);
-	  fprintf(stdout, "dataset->description = %s\n", dataset->description);
-	}
-    }
-    sub = sub->next;
+  xmlNodePtr sub;
 }
 
 static void
@@ -57,10 +56,11 @@ noark5_dataset_parser(Noark5Dataset *dataset, xmlDocPtr doc, xmlNodePtr cur)
   g_return_if_fail(cur != NULL);
   sub = cur->xmlChildrenNode;
   while (sub != NULL) {
-    if ((!xmlStrcmp(sub->name, (const xmlChar *) "description"))) {
+    printf("DEBUG: %s\n", sub->name);
+    if ((!xmlStrcmp(sub->name, (const xmlChar *) "dataset"))) {
       dataset->name = (gchar *) xmlNodeListGetString(doc, sub->xmlChildrenNode, 1);
-      fprintf(stdout, "description = %s\n", dataset->name);
-      noark5_description_parser(dataset, doc, cur);
+      fprintf(stdout, "text = %s\n", dataset->name);
+      noark5_reference_parser(dataset, doc, cur);
     }
     sub = sub->next;
   }
@@ -73,7 +73,8 @@ int main (int argc, char **argv)
   xmlNodePtr cur = NULL;
   xmlNodePtr sub = NULL;
   Noark5Dataset *dataset, *curr;
-  
+  Noark5Reference *reference;
+   
   if (argc > 1) {
     doc = xmlReadFile(argv[1], NULL, 0);
     if (doc == NULL) {
@@ -92,15 +93,23 @@ int main (int argc, char **argv)
       xmlFreeDoc(doc);
       return 2;
     }
-    sub = cur->xmlChildrenNode;
+    curr = g_new0(Noark5Dataset, 1);
+	
+    curr->name = (gchar *) xmlGetProp(cur, (const xmlChar *)"name");
+
+    printf("%s\n", curr->name);
+
+#if 0
     while (sub != NULL) {
       if ((!xmlStrcmp(sub->name, (const xmlChar *) "dataset"))) {
+	curr->name = "dataset";
 	fprintf(stdout,"Found a new dataset!\n");
-	curr = g_new0(Noark5Dataset, 1);
+	curr->name = (gchar *) xmlNodeListGetString(doc, sub->xmlChildrenNode, 1);
 	noark5_dataset_parser(curr, doc, cur);
       }
       sub = sub->next;
     }
+#endif
   } else {
     fprintf(stdout, "noark5-parser FILE\n");
   }
