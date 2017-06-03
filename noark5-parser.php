@@ -16,8 +16,7 @@ curl_exec($ch);
 $page = curl_exec($ch);
 $data = json_decode($page);
 $token = $data->{"token"};
-function browse($token, $node, $href) {
-    print "Parsing " . $href . "\n";
+function parser($token, $node, $href) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $href);
     curl_setopt($ch, CURLOPT_REFERER, 'https://nikita.hioa.no:8092/');
@@ -39,18 +38,23 @@ function browse($token, $node, $href) {
     $size = sizeof($array);
     $item = 0;
     for ($item=0;$item<$size;$item++) {
-        echo($array[$item]['href'] . "\n");
-        browse($token, $node, $array[$item]['href']);
+        parser($token, $node, $array[$item]['href']);
     }
 }
 $xml = new XMLReader();
-$xml->open("arkivuttrekk.xml");
+if ($argc > 1) {
+    $xml->open($argv[1]);
+} else {
+    echo "noark-parser.php FILE\n";
+    exit(0);
+}
+
 $dom = new DOMDOcument;
 while ($xml->read()) {
     $node = simplexml_import_dom($dom->importNode($xml->expand(), true));
     // now you can use $node without going insane about parsing
-    print ($node->dataset->description . "\n");
-    // var_dump($node->dataset);
+    parser($token, $node, "http://nikita.hioa.no:8092/noark5v4/hateoas-api/arkivstruktur/ny-arkiv");
+    print_r($node);
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, "http://nikita.hioa.no:8092/noark5v4/");
     curl_setopt($ch, CURLOPT_REFERER, 'https://nikita.hioa.no:8092/');
@@ -72,8 +76,7 @@ while ($xml->read()) {
     $size = sizeof($array);
     $item = 0;
     for ($item=0;$item<$size;$item++) {
-        echo($array[$item]['href'] . "\n");
-        browse($token, $node, $array[$item]['href']);
+        parser($token, $node, $array[$item]['href']);
     }
     // go to next <dataset>
     $xml->next('dataset');
