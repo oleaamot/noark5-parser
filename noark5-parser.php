@@ -16,6 +16,25 @@ curl_exec($ch);
 $page = curl_exec($ch);
 $data = json_decode($page);
 $token = $data->{"token"};
+function browse($token, $node, $href) {
+    print "Parsing " . $href . "\n";
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $href);
+    curl_setopt($ch, CURLOPT_REFERER, 'https://nikita.hioa.no:8092/');
+    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $node->dataset->description);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/vnd.noark5-v4+json ',
+        'Authorization: ' . $token,
+        'Content-Type: application/vnd.noark5-v4+json',
+        'Content-Length: ' . strlen($node->dataset->description))
+    );
+    curl_exec($ch);
+    $page = curl_exec($ch);
+    var_dump($page);
+}
 $xml = new XMLReader();
 $xml->open("arkivuttrekk.xml");
 $dom = new DOMDOcument;
@@ -40,8 +59,15 @@ while ($xml->read()) {
     curl_exec($ch);
     $page = curl_exec($ch);
     var_dump($page);
+    $site = json_decode($page, true);
+    $array = $site{'_links'};
+    $size = sizeof($array);
+    $item = 0;
+    for ($item=0;$item<$size;$item++) {
+        echo($array[$item]['href'] . "\n");
+        browse($token, $node, $array[$item]['href']);
+    }
     // go to next <dataset>
     $xml->next('dataset');
 }
-
 ?>
