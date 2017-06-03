@@ -34,6 +34,14 @@ function browse($token, $node, $href) {
     curl_exec($ch);
     $page = curl_exec($ch);
     var_dump($page);
+    $site = json_decode($page, true);
+    $array = $site{'_links'};
+    $size = sizeof($array);
+    $item = 0;
+    for ($item=0;$item<$size;$item++) {
+        echo($array[$item]['href'] . "\n");
+        browse($token, $node, $array[$item]['href']);
+    }
 }
 $xml = new XMLReader();
 $xml->open("arkivuttrekk.xml");
