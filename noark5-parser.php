@@ -33,7 +33,8 @@ curl_exec($ch);
 $page = curl_exec($ch);
 $data = json_decode($page);
 $token = $data->{"token"};
-function parser($token, $node, $href) {
+function browse($token, $node, $href) {
+    print "Parsing " . $href . "\n";
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $href);
     curl_setopt($ch, CURLOPT_REFERER, 'https://nikita.hioa.no:8092/');
@@ -55,7 +56,8 @@ function parser($token, $node, $href) {
     $size = sizeof($array);
     $item = 0;
     for ($item=0;$item<$size;$item++) {
-        parser($token, $node, $array[$item]['href']);
+        echo($array[$item]['href'] . "\n");
+        browse($token, $node, $array[$item]['href']);
     }
 }
 $xml = new XMLReader();
@@ -65,11 +67,12 @@ if ($argc > 1) {
     echo "noark-parser.php FILE\n";
     exit(0);
 }
-
 $dom = new DOMDocument;
 while ($xml->read()) {
     $node = simplexml_import_dom($dom->importNode($xml->expand(), true));
     // now you can use $node without going insane about parsing
+    print ($node->dataset->description . "\n");
+    // var_dump($node->dataset);
     // parser($token, $node, "http://nikita.hioa.no:8092/noark5v4/hateoas-api/arkivstruktur/ny-arkiv");
     // print_r($node);
     print ($node->systemID . "\n");
@@ -209,7 +212,6 @@ while ($xml->read()) {
     print ($node->arkivdel->mappe[0]->administrativEnhet . "\n");
     print ($node->arkivdel->mappe[0]->saksansvarlig . "\n");
     print ($node->arkivdel->mappe[0]->saksstatus . "\n");
-
     // FIXME: mappe xsi:type="saksmappe"
     print ($node->arkivdel->mappe[1]->systemID . "\n");
     print ($node->arkivdel->mappe[1]->mappeID . "\n");
@@ -351,7 +353,8 @@ while ($xml->read()) {
     $size = sizeof($array);
     $item = 0;
     for ($item=0;$item<$size;$item++) {
-        parser($token, $node, $array[$item]['href']);
+        echo($array[$item]['href'] . "\n");
+        browse($token, $node, $array[$item]['href']);
     }
     // go to next <dataset>
     $xml->next('dataset');
