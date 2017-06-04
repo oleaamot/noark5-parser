@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 // MIT License
 //
@@ -20,11 +21,23 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-$data = array("username" => "admin", "password" => "password");
+$xml = new XMLReader();
+if ($argc > 5) {
+    $xml->open($argv[1]);
+    $host = $argv[2];
+    $port = $argv[3];
+    $user = $argv[4];
+    $pass = $argv[5];
+} else {
+    echo "noark-parser.php FILE HOST PORT USER PASS\n";
+    exit(0);
+}
+$dom = new DOMDocument;
+$data = array("username" => $user, "password" => $pass);
 $data_string = json_encode($data);
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "http://nikita.hioa.no:8092/noark5v4/auth");
-curl_setopt($ch, CURLOPT_REFERER, 'https://nikita.hioa.no:8092/');
+curl_setopt($ch, CURLOPT_URL, "http://" . $host . ":" . $port . "/noark5v4/auth");
+curl_setopt($ch, CURLOPT_REFERER, "http://" . $host . ":" . $port);
 curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
 curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
@@ -37,11 +50,11 @@ curl_exec($ch);
 $page = curl_exec($ch);
 $data = json_decode($page);
 $token = $data->{"token"};
-function browse($token, $node, $href) {
+function browse($token, $host, $port, $node, $href) {
     print "Parsing " . $href . "\n";
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $href);
-    curl_setopt($ch, CURLOPT_REFERER, 'https://nikita.hioa.no:8092/');
+    curl_setopt($ch, CURLOPT_REFERER, "http://" . $host . ":" . $port . "/");
     curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
     curl_setopt($ch, CURLOPT_POSTFIELDS, $node->dataset->description);
@@ -61,23 +74,15 @@ function browse($token, $node, $href) {
     $item = 0;
     for ($item=0;$item<$size;$item++) {
         echo($array[$item]['href'] . "\n");
-        browse($token, $node, $array[$item]['href']);
+        browse($token, $host, $port, $node, $array[$item]['href']);
     }
 }
-$xml = new XMLReader();
-if ($argc > 1) {
-    $xml->open($argv[1]);
-} else {
-    echo "noark-parser.php FILE\n";
-    exit(0);
-}
-$dom = new DOMDocument;
 while ($xml->read()) {
     $node = simplexml_import_dom($dom->importNode($xml->expand(), true));
     // now you can use $node without going insane about parsing
     print ($node->dataset->description . "\n");
     // var_dump($node->dataset);
-    // parser($token, $node, "http://nikita.hioa.no:8092/noark5v4/hateoas-api/arkivstruktur/ny-arkiv");
+    // parser($token, $node, $host . ":" . $port . "/noark5v4/hateoas-api/arkivstruktur/ny-arkiv");
     // print_r($node);
     print ($node->systemID . "\n");
     print ($node->tittel . "\n");
@@ -337,8 +342,8 @@ while ($xml->read()) {
     print ($node->arkivdel->mappe[1]->saksansvarlig . "\n");
     print ($node->arkivdel->mappe[1]->saksstatus . "\n");
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "http://nikita.hioa.no:8092/noark5v4/");
-    curl_setopt($ch, CURLOPT_REFERER, 'https://nikita.hioa.no:8092/');
+    curl_setopt($ch, CURLOPT_URL, "http://" . $host . ":" . $port . "/noark5v4/");
+    curl_setopt($ch, CURLOPT_REFERER, "http://" . $host . ":" . $port);
     curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
     curl_setopt($ch, CURLOPT_POSTFIELDS, $node->dataset->description);
@@ -358,7 +363,7 @@ while ($xml->read()) {
     $item = 0;
     for ($item=0;$item<$size;$item++) {
         echo($array[$item]['href'] . "\n");
-        browse($token, $node, $array[$item]['href']);
+        browse($token, $host, $port, $node, $array[$item]['href']);
     }
     // go to next <dataset>
     $xml->next('dataset');
