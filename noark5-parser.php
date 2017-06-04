@@ -1,4 +1,21 @@
 <?php
+// Copyright (c) 2017 Ole Aamot Software
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions: # The above copyright notice and this
+// permission notice shall be included in all copies or substantial
+// portions of the Software.  # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT
+// WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+// AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+// IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 $data = array("username" => "admin", "password" => "password");
 $data_string = json_encode($data);
 $ch = curl_init();
@@ -54,7 +71,7 @@ while ($xml->read()) {
     $node = simplexml_import_dom($dom->importNode($xml->expand(), true));
     // now you can use $node without going insane about parsing
     // parser($token, $node, "http://nikita.hioa.no:8092/noark5v4/hateoas-api/arkivstruktur/ny-arkiv");
-    //    print_r($node);
+    // print_r($node);
     print ($node->systemID . "\n");
     print ($node->tittel . "\n");
     print ($node->beskrivelse . "\n");
@@ -129,12 +146,12 @@ while ($xml->read()) {
     print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->postnummer . "\n");
     print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->epostadresse . "\n");
     print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->telefonnummer . "\n");
+    // print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->kontaktperson . "\n");
     print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->administrativEnhet . "\n");
     print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->saksbehandler . "\n");
-    print ("Test\n");
-    // print ($node->arkivdel->mappe[0]->registrering[0]->avskrivning[0]->avskrivningsdato . "\n");
-    // print ($node->arkivdel->mappe[0]->registrering[0]->avskrivning[0]->avskrevetAv . "\n");
-    // print ($node->arkivdel->mappe[0]->registrering[0]->avskrivning[0]->avskrivningsmaate . "\n");
+    // print ($node->arkivdel->mappe[0]->registrering[0]->avskrivning->avskrivningsdato . "\n");
+    // print ($node->arkivdel->mappe[0]->registrering[0]->avskrivning->avskrevetAv . "\n");
+    // print ($node->arkivdel->mappe[0]->registrering[0]->avskrivning->avskrivningsmaate . "\n");
     // FIXME: registrering xsi:type="journalpost"
     print ($node->arkivdel->mappe[0]->registrering[1]->systemID . "\n");
     print ($node->arkivdel->mappe[0]->registrering[1]->opprettetDato . "\n");
@@ -253,9 +270,8 @@ while ($xml->read()) {
     print ($node->arkivdel->mappe[1]->registrering[0]->korrespondansepart->kontaktperson . "\n");
     print ($node->arkivdel->mappe[1]->registrering[0]->korrespondansepart->administrativEnhet . "\n");
     print ($node->arkivdel->mappe[1]->registrering[0]->korrespondansepart->saksbehandler . "\n");
-    print ("Test\n");
-    // print ($node->arkivdel->mappe[1]->registrering[0]->avskrivning->avskrivningsDato . "\n");
-    // print ($node->arkivdel->mappe[1]->registrering[0]->avskrivning->avSkrevetAv . "\n");
+    // print ($node->arkivdel->mappe[1]->registrering[0]->avskrivning->avskrivningsdato . "\n");
+    // print ($node->arkivdel->mappe[1]->registrering[0]->avskrivning->avskrevetAv . "\n");
     // print ($node->arkivdel->mappe[1]->registrering[0]->avskrivning->avskrivningsmaate . "\n");
     // FIXME: registrering xsi:type="journalpost"
     print ($node->arkivdel->mappe[1]->registrering[1]->systemID . "\n");
