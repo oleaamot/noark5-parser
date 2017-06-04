@@ -74,7 +74,7 @@ function browse($token, $host, $port, $node, $href) {
     $item = 0;
     for ($item=0;$item<$size;$item++) {
         echo($array[$item]['href'] . "\n");
-        browse($token, $host, $port, $node, $array[$item]['href']);
+        // browse($token, $host, $port, $node, $array[$item]['href']);
     }
 }
 while ($xml->read()) {
