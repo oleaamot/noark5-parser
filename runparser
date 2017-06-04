@@ -20,5 +20,5 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-wget -O arkivstruktur.xml https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/arkivstruktur.xml
-php noark5-parser.php arkivstruktur.xml localhost 8092 admin password
+wget -q -O arkivstruktur.xml https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/arkivstruktur.xml
+php noark5-parser.php arkivstruktur.xml nikita.hioa.no 8092 admin password
