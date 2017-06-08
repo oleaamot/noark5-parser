@@ -120,19 +120,10 @@ while ($xml->read()) {
     $data = json_encode($node);
     $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":\"" . $node->avsluttetDato . "\"}";
     upload($baseurl, $token, $arkiv, "hateoas-api/arkivstruktur/ny-arkiv");
-    print ("DEBUG\n");
-    print_r($node->arkivskaper);
     $arkivskaper = "{ \"arkivskaperID\": \"" . $node->arkivskaper->arkivskaperID . "\", \"arkivskaperNavn\": \"" . $node->arkivskaper->arkivskaperNavn . "\", \"beskrivelse\": \"" . $node->arkivskaper->beskrivelse . "\"}";
     upload($baseurl, $token, $arkivskaper, "hateoas-api/arkivstruktur/ny-arkivskaper");
-    $arkivdel = json_encode($node->arkivdel);
+    $arkivdel = "{ \"systemID\": \"" . $node->arkivdel->systemID . "\", \"tittel\": \"" . $node->arkivdel->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->beskrivelse . "\", \"arkivdelstatus\": \"" . $node->arkivdel->arkivdelstatus . "\", \"dokumentmedium\": \"" . $node->arkivdel->dokumentmedium. "\", \"opprettetDato\": \"" . $node->arkivdel->opprettetDato . "\", \"avsluttetAv\": \"" . $node->arkivdel->avsluttetAv . "\"}";
     upload($baseurl, $token, $arkivdel, "hateoas-api/arkivstruktur/ny-arkivdel");
-    print ($node->arkivdel->systemID . "\n");
-    print ($node->arkivdel->tittel . "\n");
-    print ($node->arkivdel->beskrivelse . "\n");
-    print ($node->arkivdel->arkivdelstatus . "\n");
-    print ($node->arkivdel->dokumentmedium . "\n");
-    print ($node->arkivdel->opprettetDato . "\n");
-    print ($node->arkivdel->avsluttetAv . "\n");
     // FIXME: mappe xsi:type="saksmappe"
     print ($node->arkivdel->mappe[0]->systemID . "\n");
     print ($node->arkivdel->mappe[0]->mappeID . "\n");
