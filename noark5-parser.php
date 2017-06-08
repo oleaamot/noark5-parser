@@ -28,7 +28,7 @@ if ($argc > 4) {
     $user = $argv[3];
     $pass = $argv[4];
 } else {
-    echo "noark-parser.php FILE BASEURL USER PASS\n";
+    echo "noark5-parser.php FILE BASEURL USER PASS\n";
     exit(0);
 }
 $dom = new DOMDocument;
