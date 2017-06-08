@@ -22,22 +22,21 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 $xml = new XMLReader();
-if ($argc > 5) {
+if ($argc > 4) {
     $xml->open($argv[1]);
-    $host = $argv[2];
-    $port = $argv[3];
-    $user = $argv[4];
-    $pass = $argv[5];
+    $baseurl = $argv[2];
+    $user = $argv[3];
+    $pass = $argv[4];
 } else {
-    echo "noark-parser.php FILE HOST PORT USER PASS\n";
+    echo "noark-parser.php FILE BASEURL USER PASS\n";
     exit(0);
 }
 $dom = new DOMDocument;
 $data = array("username" => $user, "password" => $pass);
 $data_string = json_encode($data);
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "http://" . $host . ":" . $port . "/noark5v4/auth");
-curl_setopt($ch, CURLOPT_REFERER, "http://" . $host . ":" . $port);
+curl_setopt($ch, CURLOPT_URL, $baseurl . "auth");
+curl_setopt($ch, CURLOPT_REFERER, $baseurl);
 curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
 curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
@@ -50,20 +49,53 @@ curl_exec($ch);
 $page = curl_exec($ch);
 $data = json_decode($page);
 $token = $data->{"token"};
-function browse($token, $host, $port, $node, $href) {
+
+function upload($baseurl, $token, $data, $href) {
+    print ("Uploading $data on $baseurl/$href with $token\n");
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $baseurl . "hateoas-api/arkivstruktur/ny-arkiv");
+    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/vnd.noark5-v4+json ',
+        'Authorization: ' . $token,
+        'Content-Type: application/vnd.noark5-v4+json')
+    );
+    curl_exec($ch);
+    $page = curl_exec($ch);
+    var_dump($page);
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $baseurl . "hateoas-api/arkivstruktur/arkiv/");
+    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/vnd.noark5-v4+json ',
+        'Authorization: ' . $token,
+        'Content-Type: application/vnd.noark5-v4+json')
+    );
+    curl_exec($ch);
+    $page = curl_exec($ch);
+    var_dump($page);
+}
+
+function browse($token, $baseurl, $node, $href) {
     print "Parsing " . $href . "\n";
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $href);
-    curl_setopt($ch, CURLOPT_REFERER, "http://" . $host . ":" . $port . "/");
+    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
     curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $node->dataset->description);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'Accept: application/vnd.noark5-v4+json ',
         'Authorization: ' . $token,
         'Content-Type: application/vnd.noark5-v4+json',
-        'Content-Length: ' . strlen($node->dataset->description))
+        'Content-Length: ' . strlen($node))
     );
     curl_exec($ch);
     $page = curl_exec($ch);
@@ -74,28 +106,26 @@ function browse($token, $host, $port, $node, $href) {
     $item = 0;
     for ($item=0;$item<$size;$item++) {
         echo($array[$item]['href'] . "\n");
-        // browse($token, $host, $port, $node, $array[$item]['href']);
+        // upload($baseurl, $node, $href);
+        // if ($array[$item]['href'] == "hateoas-api/arkivstruktur/ny-arkiv") {
+        //    print "ny-arkiv";
+        // }
+        // browse($token, $baseurl, $node, $array[$item]['href']);
     }
 }
 while ($xml->read()) {
     $node = simplexml_import_dom($dom->importNode($xml->expand(), true));
     // now you can use $node without going insane about parsing
-    print ($node->dataset->description . "\n");
-    // var_dump($node->dataset);
-    // parser($token, $node, $host . ":" . $port . "/noark5v4/hateoas-api/arkivstruktur/ny-arkiv");
-    // print_r($node);
-    print ($node->systemID . "\n");
-    print ($node->tittel . "\n");
-    print ($node->beskrivelse . "\n");
-    print ($node->arkivstatus . "\n");
-    print ($node->dokumentmedium . "\n");
-    print ($node->opprettetDato . "\n");
-    print ($node->opprettetAv . "\n");
-    print ($node->opprettetDato . "\n");
-    print ($node->avsluttetDato . "\n");
-    print ($node->arkivskaper->arkivskaperID . "\n");
-    print ($node->arkivskaper->arkivskaperNavn . "\n");
-    print ($node->arkivskaper->beskrivelse . "\n");
+    var_dump($node);
+    $data = json_encode($node);
+    $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":\"" . $node->avsluttetDato . "\"}";
+    upload($baseurl, $token, $arkiv, "hateoas-api/arkivstruktur/ny-arkiv");
+    print ("DEBUG\n");
+    print_r($node->arkivskaper);
+    $arkivskaper = "{ \"arkivskaperID\": \"" . $node->arkivskaper->arkivskaperID . "\", \"arkivskaperNavn\": \"" . $node->arkivskaper->arkivskaperNavn . "\", \"beskrivelse\": \"" . $node->arkivskaper->beskrivelse . "\"}";
+    upload($baseurl, $token, $arkivskaper, "hateoas-api/arkivstruktur/ny-arkivskaper");
+    $arkivdel = json_encode($node->arkivdel);
+    upload($baseurl, $token, $arkivdel, "hateoas-api/arkivstruktur/ny-arkivdel");
     print ($node->arkivdel->systemID . "\n");
     print ($node->arkivdel->tittel . "\n");
     print ($node->arkivdel->beskrivelse . "\n");
@@ -341,18 +371,17 @@ while ($xml->read()) {
     print ($node->arkivdel->mappe[1]->administrativEnhet . "\n");
     print ($node->arkivdel->mappe[1]->saksansvarlig . "\n");
     print ($node->arkivdel->mappe[1]->saksstatus . "\n");
+
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "http://" . $host . ":" . $port . "/noark5v4/");
-    curl_setopt($ch, CURLOPT_REFERER, "http://" . $host . ":" . $port);
+    curl_setopt($ch, CURLOPT_URL, $baseurl);
+    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
     curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $node->dataset->description);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'Accept: application/vnd.noark5-v4+json ',
         'Authorization: ' . $token,
-        'Content-Type: application/vnd.noark5-v4+json',
-        'Content-Length: ' . strlen($node->dataset->description))
+        'Content-Type: application/vnd.noark5-v4+json')
     );
     curl_exec($ch);
     $page = curl_exec($ch);
@@ -363,9 +392,9 @@ while ($xml->read()) {
     $item = 0;
     for ($item=0;$item<$size;$item++) {
         echo($array[$item]['href'] . "\n");
-        browse($token, $host, $port, $node, $array[$item]['href']);
+        browse($token, $baseurl, $node, $array[$item]['href']);
     }
-    // go to next <dataset>
-    $xml->next('dataset');
+    // go to next <arkivdel>
+    $xml->next('arkivdel');
 }
 ?>
