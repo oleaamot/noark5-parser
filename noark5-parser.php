@@ -53,7 +53,7 @@ $token = $data->{"token"};
 function upload($baseurl, $token, $data, $href) {
     print ("Uploading $data on $baseurl/$href with $token\n");
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $baseurl . "hateoas-api/arkivstruktur/ny-arkiv");
+    curl_setopt($ch, CURLOPT_URL, $baseurl . $href);
     curl_setopt($ch, CURLOPT_REFERER, $baseurl);
     curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
