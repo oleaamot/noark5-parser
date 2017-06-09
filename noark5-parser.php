@@ -67,20 +67,21 @@ function upload($baseurl, $token, $data, $href) {
     curl_exec($ch);
     $page = curl_exec($ch);
     var_dump($page);
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $baseurl . "hateoas-api/arkivstruktur/arkiv/");
-    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Accept: application/vnd.noark5-v4+json ',
-        'Authorization: ' . $token,
-        'Content-Type: application/vnd.noark5-v4+json')
-    );
-    curl_exec($ch);
-    $page = curl_exec($ch);
-    var_dump($page);
+    /* $ch = curl_init(); */
+    /* curl_setopt($ch, CURLOPT_URL, $baseurl . "hateoas-api/arkivstruktur/arkiv/"); */
+    /* curl_setopt($ch, CURLOPT_REFERER, $baseurl); */
+    /* curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1'); */
+    /* curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET"); */
+    /* curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); */
+    /* curl_setopt($ch, CURLOPT_HTTPHEADER, array( */
+    /*     'Accept: application/vnd.noark5-v4+json ', */
+    /*     'Authorization: ' . $token, */
+    /*     'Content-Type: application/vnd.noark5-v4+json') */
+    /* ); */
+    /* curl_exec($ch); */
+    /* $page = curl_exec($ch); */
+    /* var_dump($page); */
+    return $page;
 }
 
 function browse($token, $baseurl, $node, $href) {
@@ -114,255 +115,155 @@ function browse($token, $baseurl, $node, $href) {
     }
 }
 while ($xml->read()) {
+
     $node = simplexml_import_dom($dom->importNode($xml->expand(), true));
     // now you can use $node without going insane about parsing
     var_dump($node);
-    $data = json_encode($node);
-    $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":\"" . $node->avsluttetDato . "\"}";
-    upload($baseurl, $token, $arkiv, "hateoas-api/arkivstruktur/ny-arkiv");
-    $arkivskaper = "{ \"arkivskaperID\": \"" . $node->arkivskaper->arkivskaperID . "\", \"arkivskaperNavn\": \"" . $node->arkivskaper->arkivskaperNavn . "\", \"beskrivelse\": \"" . $node->arkivskaper->beskrivelse . "\"}";
-    upload($baseurl, $token, $arkivskaper, "hateoas-api/arkivstruktur/ny-arkivskaper");
-    $arkivdel = "{ \"systemID\": \"" . $node->arkivdel->systemID . "\", \"tittel\": \"" . $node->arkivdel->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->beskrivelse . "\", \"arkivdelstatus\": \"" . $node->arkivdel->arkivdelstatus . "\", \"dokumentmedium\": \"" . $node->arkivdel->dokumentmedium. "\", \"opprettetDato\": \"" . $node->arkivdel->opprettetDato . "\", \"avsluttetAv\": \"" . $node->arkivdel->avsluttetAv . "\"}";
-    upload($baseurl, $token, $arkivdel, "hateoas-api/arkivstruktur/ny-arkivdel");
-    // FIXME: mappe xsi:type="saksmappe"
-    print ($node->arkivdel->mappe[0]->systemID . "\n");
-    print ($node->arkivdel->mappe[0]->mappeID . "\n");
-    print ($node->arkivdel->mappe[0]->tittel . "\n");
-    print ($node->arkivdel->mappe[0]->beskrivelse . "\n");
-    print ($node->arkivdel->mappe[0]->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[0]->avsluttetDato . "\n");
-    // FIXME: registrering xsi:type="journalpost"
-    print ($node->arkivdel->mappe[0]->registrering[0]->systemID . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->arkivertDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->arkivertAv . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->systemID . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumenttype . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumentstatus . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->tittel . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->beskrivelse . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->forfatter . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumentmedium . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->tilknyttetRegistreringSom . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumentnummer . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->tilknyttetDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->tilknyttetAv . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->versjonsnummer . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->variantformat . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->format . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->sjekksum . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->sjekksumAlgoritme . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->filstoerrelse . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->registreringsID . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->tittel . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->offentligTittel . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->forfatter . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->journalaar . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->journalsekvensnummer . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->journalpostnummer . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->journalposttype . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->journalstatus . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->journaldato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->dokumentetsDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->mottattDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->antallVedlegg . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->journalenhet . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->korrespondanseparttype . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->korrespondansepartNavn . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->postadresse . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->postnummer . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->epostadresse . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->telefonnummer . "\n");
-    // print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->kontaktperson . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->administrativEnhet . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[0]->korrespondansepart->saksbehandler . "\n");
-    // print ($node->arkivdel->mappe[0]->registrering[0]->avskrivning->avskrivningsdato . "\n");
-    // print ($node->arkivdel->mappe[0]->registrering[0]->avskrivning->avskrevetAv . "\n");
-    // print ($node->arkivdel->mappe[0]->registrering[0]->avskrivning->avskrivningsmaate . "\n");
-    // FIXME: registrering xsi:type="journalpost"
-    print ($node->arkivdel->mappe[0]->registrering[1]->systemID . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->arkivertDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->arkivertAv . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->systemID . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumenttype . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumentstatus . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->tittel . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->beskrivelse . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->forfatter . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumentmedium . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->tilknyttetRegistreringSom . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumentnummer . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->tilknyttetDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->tilknyttetAv . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->versjonsnummer . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->variantformat . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->format . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->sjekksum . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->sjekksumAlgoritme . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->filstoerrelse . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->registreringsID . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->tittel . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->offentligTittel . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->forfatter . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->journalaar . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->journalsekvensnummer . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->journalpostnummer . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->journalposttype . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->journalstatus . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->journaldato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->dokumentetsDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->sendtDato . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->antallVedlegg . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->journalenhet . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->korrespondansepart->korrespondanseparttype . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->korrespondansepart->korrespondansepartNavn . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->korrespondansepart->postadresse . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->korrespondansepart->postnummer . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->korrespondansepart->epostadresse . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->korrespondansepart->telefonnummer . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->korrespondansepart->kontaktperson . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->korrespondansepart->administrativEnhet . "\n");
-    print ($node->arkivdel->mappe[0]->registrering[1]->korrespondansepart->saksbehandler . "\n");
-    print ($node->arkivdel->mappe[0]->saksaar . "\n");
-    print ($node->arkivdel->mappe[0]->sakssekvensnummer . "\n");
-    print ($node->arkivdel->mappe[0]->saksdato . "\n");
-    print ($node->arkivdel->mappe[0]->administrativEnhet . "\n");
-    print ($node->arkivdel->mappe[0]->saksansvarlig . "\n");
-    print ($node->arkivdel->mappe[0]->saksstatus . "\n");
-    // FIXME: mappe xsi:type="saksmappe"
-    print ($node->arkivdel->mappe[1]->systemID . "\n");
-    print ($node->arkivdel->mappe[1]->mappeID . "\n");
-    print ($node->arkivdel->mappe[1]->tittel . "\n");
-    print ($node->arkivdel->mappe[1]->beskrivelse . "\n");
-    print ($node->arkivdel->mappe[1]->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[1]->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[1]->avsluttetDato . "\n");
-    print ($node->arkivdel->mappe[1]->avsluttetAv . "\n");
-    // FIXME: registrering xsi:type="journalpost"
-    print ($node->arkivdel->mappe[1]->registrering[0]->systemID . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->arkivertDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->arkivertAv . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->systemID . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumenttype . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumentstatus . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->tittel . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->beskrivelse . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->forfatter . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumentmedium . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->tilknyttetRegistreringSom . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumentnummer . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->tilknyttetDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->tilknyttetAv . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->versjonsnummer . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->variantformat . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->format . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->sjekksum . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->sjekksumAlgoritme . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentbeskrivelse->dokumentobjekt->filstoerrelse . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->registreringsID . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->tittel . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->offentligTittel . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->forfatter . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->journalaar . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->journalsekvensnummer . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->journalpostnummer . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->journalposttype . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->journalstatus . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->journaldato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->dokumentetsDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->mottattDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->antallVedlegg . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->journalenhet . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->korrespondansepart->korrespondanseparttype . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->korrespondansepart->korrespondansepartNavn . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->korrespondansepart->postadresse . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->korrespondansepart->postnummer . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->korrespondansepart->epostadresse . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->korrespondansepart->telefonnummer . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->korrespondansepart->kontaktperson . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->korrespondansepart->administrativEnhet . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[0]->korrespondansepart->saksbehandler . "\n");
-    // print ($node->arkivdel->mappe[1]->registrering[0]->avskrivning->avskrivningsdato . "\n");
-    // print ($node->arkivdel->mappe[1]->registrering[0]->avskrivning->avskrevetAv . "\n");
-    // print ($node->arkivdel->mappe[1]->registrering[0]->avskrivning->avskrivningsmaate . "\n");
-    // FIXME: registrering xsi:type="journalpost"
-    print ($node->arkivdel->mappe[1]->registrering[1]->systemID . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->arkivertDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->arkivertAv . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->systemID . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumenttype . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumentstatus . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->tittel . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->beskrivelse . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->forfatter . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumentmedium . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->tilknyttetRegistreringSom . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumentnummer . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->tilknyttetDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->tilknyttetAv . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->versjonsnummer . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->variantformat . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->format . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->opprettetDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->opprettetAv . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->sjekksum . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->sjekksumAlgoritme . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentbeskrivelse->dokumentobjekt->filstoerrelse . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->registreringsID . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->tittel . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->offentligTittel . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->forfatter . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->journalaar . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->journalsekvensnummer . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->journalpostnummer . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->journalposttype . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->journalstatus . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->journaldato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->dokumentetsDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->sendtDato . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->antallVedlegg . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->journalenhet . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->korrespondansepart->korrespondanseparttype . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->korrespondansepart->korrespondansepartNavn . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->korrespondansepart->postadresse . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->korrespondansepart->postnummer . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->korrespondansepart->epostadresse . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->korrespondansepart->telefonnummer . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->korrespondansepart->kontaktperson . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->korrespondansepart->administrativEnhet . "\n");
-    print ($node->arkivdel->mappe[1]->registrering[1]->korrespondansepart->saksbehandler . "\n");
-    print ($node->arkivdel->mappe[1]->saksaar . "\n");
-    print ($node->arkivdel->mappe[1]->sakssekvensnummer . "\n");
-    print ($node->arkivdel->mappe[1]->saksdato . "\n");
-    print ($node->arkivdel->mappe[1]->administrativEnhet . "\n");
-    print ($node->arkivdel->mappe[1]->saksansvarlig . "\n");
-    print ($node->arkivdel->mappe[1]->saksstatus . "\n");
 
+    $data = json_encode($node);
+
+    $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":\"" . $node->avsluttetDato . "\"}";
+    $arkivresult = upload($baseurl, $token, $arkiv, "hateoas-api/arkivstruktur/ny-arkiv");
+    $arkivdata = json_decode($arkivresult);
+    print("DEBUG\n");
+    print_r($arkivdata);
+    print("DEBUG\n");    
+    $arkivskaper = "{ \"arkivskaperID\": \"" . $node->arkivskaper->arkivskaperID . "\", \"arkivskaperNavn\": \"" . $node->arkivskaper->arkivskaperNavn . "\", \"beskrivelse\": \"" . $node->arkivskaper->beskrivelse . "\"}";
+    $arkivskaperresult = upload($baseurl, $token, $arkivskaper, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivskaper");
+    $arkivskaperdata = json_decode($arkivskaperresult);
+
+    $arkivdel = "{ \"tittel\": \"" . $node->arkivdel->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->beskrivelse . "\", \"arkivdelstatus\": \"" . $node->arkivdel->arkivdelstatus . "\", \"dokumentmedium\": \"" . $node->arkivdel->dokumentmedium. "\", \"opprettetDato\": \"" . $node->arkivdel->opprettetDato . "\", \"avsluttetAv\": \"" . $node->arkivdel->avsluttetAv . "\"}";
+    $arkivdelresult = upload($baseurl, $token, $arkivdel, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivdel");
+    $arkivdeldata = json_decode($arkivdelresult);
+
+    // FIXME: mappe xsi:type="saksmappe"
+    $mappe_items = count($node->arkivdel->mappe);
+    for ($mappeitem=0;$mappeitem<$mappe_items;$mappeitem++) {
+        print ($node->arkivdel->mappe[$mappeitem]->systemID . "\n");
+        print ($node->arkivdel->mappe[$mappeitem]->mappeID . "\n");
+        print ($node->arkivdel->mappe[$mappeitem]->tittel . "\n");
+        print ($node->arkivdel->mappe[$mappeitem]->beskrivelse . "\n");
+        print ($node->arkivdel->mappe[$mappeitem]->opprettetDato . "\n");
+        print ($node->arkivdel->mappe[$mappeitem]->avsluttetDato . "\n");
+        print ($node->arkivdel->mappe[$mappeitem]->opprettetAv . "\n");
+        print ($node->arkivdel->mappe[$mappeitem]->avsluttetAv . "\n");
+        $mappe = "{ \"mappeID\": \"" . $node->arkivdel->mappe[$mappeitem]->mappeID . "\", \"tittel\": \"" . $node->arkivdel->mappe[$mappeitem]->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->mappe[$mappeitem]->beskrivelse . "\", \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetAv . "\", \"avsluttetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->avsluttetAv . "\", \"avsluttetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->avsluttetDato . "\"}";
+        $mapperesult = upload($baseurl, $token, $mappe, "hateoas-api/arkivstruktur/arkivdel/" . $arkivdeldata->systemID . "/ny-mappe");
+        $mappedata = json_decode($mapperesult);
+        // FIXME: registrering xsi:type="journalpost"
+        $registrering_items = count($node->arkivdel->mappe[$mappeitem]->registrering);
+        for($registreringitem=0;$registreringitem<$registrering_items;$registreringitem++) {
+
+            $registrering = "{ \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetAv . "\", \"arkivertDato\": \"" . $node->arkivdel->mappe[$mappeitem]->arkivertDato . "\", \"arkivertAv\": \"" . $node->arkivdel->mappe[$mappeitem]->arkivertAv . "\"}";
+            upload($baseurl, $token, $mappe, "hateoas-api/arkivstruktur/mappe/" . $mappedata->systemID . "/ny-registrering");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->systemID . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumenttype . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentstatus . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tittel . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->beskrivelse . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->forfatter . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->opprettetDato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->opprettetAv . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentmedium . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetRegistreringSom . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentnummer . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetDato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetAv . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->versjonsnummer . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->variantformat . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->format . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetDato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetAv . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksum . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksumAlgoritme . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->filstoerrelse . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->registreringsID . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->tittel . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->offentligTittel . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->forfatter . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalaar . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalsekvensnummer . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalpostnummer . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalposttype . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalstatus . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journaldato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentetsDato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->mottattDato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->antallVedlegg . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalenhet . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->korrespondanseparttype . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->korrespondansepartNavn . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postadresse . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postnummer . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->epostadresse . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->telefonnummer . "\n");
+            // print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->kontaktperson . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->administrativEnhet . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->saksbehandler . "\n");
+            /* // FIXME: mappe xsi:type="saksmappe" */
+            // FIXME: registrering xsi:type="journalpost"
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->systemID . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->opprettetDato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->opprettetAv . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->arkivertDato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->arkivertAv . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->systemID . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumenttype . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentstatus . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tittel . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->beskrivelse . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->forfatter . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->opprettetDato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->opprettetAv . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentmedium . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetRegistreringSom . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentnummer . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetDato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetAv . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->versjonsnummer . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->variantformat . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->format . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetDato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetAv . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksum . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksumAlgoritme . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->filstoerrelse . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->registreringsID . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->tittel . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->offentligTittel . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->forfatter . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalaar . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalsekvensnummer . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalpostnummer . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalposttype . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalstatus . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journaldato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentetsDato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->mottattDato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->antallVedlegg . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalenhet . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->korrespondanseparttype . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->korrespondansepartNavn . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postadresse . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postnummer . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->epostadresse . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->telefonnummer . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->kontaktperson . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->administrativEnhet . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->saksbehandler . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->avskrivning->avskrivningsdato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->avskrivning->avskrevetAv . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->avskrivning->avskrivningsmaate . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->saksaar . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->sakssekvensnummer . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->saksdato . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->administrativEnhet . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->saksansvarlig . "\n");
+            print ($node->arkivdel->mappe[$mappeitem]->saksstatus . "\n");
+        }
+    }
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $baseurl);
     curl_setopt($ch, CURLOPT_REFERER, $baseurl);
