@@ -155,7 +155,8 @@ while ($xml->read()) {
         for($registreringitem=0;$registreringitem<$registrering_items;$registreringitem++) {
 
             $registrering = "{ \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetAv . "\", \"arkivertDato\": \"" . $node->arkivdel->mappe[$mappeitem]->arkivertDato . "\", \"arkivertAv\": \"" . $node->arkivdel->mappe[$mappeitem]->arkivertAv . "\"}";
-            upload($baseurl, $token, $mappe, "hateoas-api/arkivstruktur/mappe/" . $mappedata->systemID . "/ny-registrering");
+            $registreringresult = upload($baseurl, $token, $mappe, "hateoas-api/arkivstruktur/mappe/" . $mappedata->systemID . "/ny-registrering");
+            $registreringdata = json_decode($registreringresult);
             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->systemID . "\n");
             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumenttype . "\n");
             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentstatus . "\n");
