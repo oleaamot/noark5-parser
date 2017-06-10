@@ -27,3 +27,5 @@ wget -q -O dokumenter/14305c90-99a2-4444-bb76-63ddae8a2e98.pdf https://raw.githu
 wget -q -O dokumenter/61677fa2-659b-4200-9438-6c43e4826d3f.pdf https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/dokumenter/61677fa2-659b-4200-9438-6c43e4826d3f.pdf
 wget -q -O dokumenter/1755a60f-c9c0-4943-924f-59a6601484a9.pdf https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/dokumenter/1755a60f-c9c0-4943-924f-59a6601484a9.pdf
 php noark5-parser.php arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
+wget -q -O arkivstruktur.xml https://raw.githubusercontent.com/arkivverket/arkade5/master/src/Arkivverket.Arkade.Test/TestData/Noark5/ContentClassificationSystem/arkivstruktur.xml
+php noark5-parser.php arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
