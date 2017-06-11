@@ -139,7 +139,7 @@ while ($xml->read()) {
     // FIXME: mappe xsi:type="saksmappe"
     $mappe_items = count($node->arkivdel->mappe);
     for ($mappeitem=0;$mappeitem<$mappe_items;$mappeitem++) {
-        print ($node->arkivdel->mappe[$mappeitem]->systemID . "\n");
+        // print ("iteration num [" . $mappeitem . "] " . $node->arkivdel->mappe[$mappeitem]->systemID . "\n");
         print ($node->arkivdel->mappe[$mappeitem]->mappeID . "\n");
         print ($node->arkivdel->mappe[$mappeitem]->tittel . "\n");
         print ($node->arkivdel->mappe[$mappeitem]->beskrivelse . "\n");
@@ -162,8 +162,11 @@ while ($xml->read()) {
             $dokumentbeskrivelseresult = upload($baseurl, $token, $dokumentbeskrivelse, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-dokumentbeskrivelse");
             $dokumentbeskrivelsedata = json_decode($dokumentbeskrivelseresult);
             $dokumentobjekt = "{ \"versjonsnummer\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->versjonsnummer . "\", \"variantformat\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->variantformat . "\", \"format\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->format . "\", \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetAv . "\", \"referanseDokumentfil\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\", \"referanseDokumentfil\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\", \"sjekksum\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksum . "\", \"sjekksumAlgoritme\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksumAlgoritme . "\", \"filstoerrelse\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->filstoerrelse . "\"}";
-            $dokumentobjektresult = upload($baseurl, $token, $dokumentobjekt, "hateoas-api/arkivstruktur/dokumentbeskrivelse/" . $dokumentbeskrivelsedata->systemID . "/ny-dokumentobjekt");
+            $dokumentobjektresult = upload($baseurl, $token, $dokumentobjekt, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-dokumentobjekt");
             $dokumentobjektdata = json_decode($dokumentobjektresult);
+            $korrespondansepart = "{ 'korrespondanseparttype' : { 'kode' : 'EA' }, 'navn' : '" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepartNavn . "', 'postadresse': { 'adresselinje1' : '" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postadresse . "', 'postnr' : '" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postnummer . "', } 'kontaktinformasjon' : { 'epostadresse' : '" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->epostadresse . "'}, }";
+            $korrespondansepartresult = upload($baseurl, $token, $korrespondansepart, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-korrespondansepartperson");
+            $korrespondansepartdata = json_decode($korrespondansepartresult);
             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->korrespondanseparttype . "\n");
             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->korrespondansepartNavn . "\n");
             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postadresse . "\n");
