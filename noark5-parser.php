@@ -50,7 +50,7 @@ $page = curl_exec($ch);
 $data = json_decode($page);
 $token = $data->{"token"};
 
-function target($baseurl, $token) {
+function create($baseurl, $token) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $baseurl . "hateoas-api/arkivstruktur/arkiv/");
     curl_setopt($ch, CURLOPT_REFERER, $baseurl);
@@ -264,5 +264,5 @@ while ($xml->read()) {
     // go to next <arkivdel>
     $xml->next('arkivdel');
 }
-target($baseurl, $token);
+create($baseurl, $token);
 ?>
