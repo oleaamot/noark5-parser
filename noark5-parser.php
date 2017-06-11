@@ -49,7 +49,6 @@ curl_exec($ch);
 $page = curl_exec($ch);
 $data = json_decode($page);
 $token = $data->{"token"};
-
 function create($baseurl, $token) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $baseurl . "hateoas-api/arkivstruktur/arkiv/");
@@ -64,9 +63,9 @@ function create($baseurl, $token) {
     );
     curl_exec($ch);
     $page = curl_exec($ch);
-    var_dump($page);
+    $data = json_decode($page);
+    return $data;
 }
-
 function upload($baseurl, $token, $data, $href) {
     print ("Uploading $data on $baseurl/$href with $token\n");
     $ch = curl_init();
@@ -86,7 +85,6 @@ function upload($baseurl, $token, $data, $href) {
     var_dump($page);
     return $page;
 }
-
 function browse($token, $baseurl, $node, $href) {
     print "Parsing " . $href . "\n";
     $ch = curl_init();
@@ -118,24 +116,19 @@ function browse($token, $baseurl, $node, $href) {
     }
 }
 while ($xml->read()) {
-
     $node = simplexml_import_dom($dom->importNode($xml->expand(), true));
     // now you can use $node without going insane about parsing
     var_dump($node);
-
     $data = json_encode($node);
-
     $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":\"" . $node->avsluttetDato . "\"}";
     $arkivresult = upload($baseurl, $token, $arkiv, "hateoas-api/arkivstruktur/ny-arkiv");
     $arkivdata = json_decode($arkivresult);
     $arkivskaper = "{ \"arkivskaperID\": \"" . $node->arkivskaper->arkivskaperID . "\", \"arkivskaperNavn\": \"" . $node->arkivskaper->arkivskaperNavn . "\", \"beskrivelse\": \"" . $node->arkivskaper->beskrivelse . "\"}";
     $arkivskaperresult = upload($baseurl, $token, $arkivskaper, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivskaper");
     $arkivskaperdata = json_decode($arkivskaperresult);
-
     $arkivdel = "{ \"tittel\": \"" . $node->arkivdel->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->beskrivelse . "\", \"arkivdelstatus\": \"" . $node->arkivdel->arkivdelstatus . "\", \"dokumentmedium\": \"" . $node->arkivdel->dokumentmedium. "\", \"opprettetDato\": \"" . $node->arkivdel->opprettetDato . "\", \"avsluttetAv\": \"" . $node->arkivdel->avsluttetAv . "\"}";
     $arkivdelresult = upload($baseurl, $token, $arkivdel, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivdel");
     $arkivdeldata = json_decode($arkivdelresult);
-
     // FIXME: mappe xsi:type="saksmappe"
     $mappe_items = count($node->arkivdel->mappe);
     for ($mappeitem=0;$mappeitem<$mappe_items;$mappeitem++) {
@@ -264,5 +257,6 @@ while ($xml->read()) {
     // go to next <arkivdel>
     $xml->next('arkivdel');
 }
-create($baseurl, $token);
+$data = create($baseurl, $token);
+print_r($data);
 ?>
