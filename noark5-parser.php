@@ -130,9 +130,10 @@ while ($xml->read()) {
     $arkivdelresult = upload($baseurl, $token, $arkivdel, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivdel");
     $arkivdeldata = json_decode($arkivdelresult);
     // FIXME: mappe xsi:type="saksmappe"
-    $mappe_items = count($node->arkivdel->mappe);
+    $mappe_items = $node->arkivdel->mappe->count();
+    printf("DEBUG mappe count %d\n", $mappe_items);
     for ($mappeitem=0;$mappeitem<$mappe_items;$mappeitem++) {
-        // print ("iteration num [" . $mappeitem . "] " . $node->arkivdel->mappe[$mappeitem]->systemID . "\n");
+        print ("iteration num [" . $mappeitem . "] " . $node->arkivdel->mappe[$mappeitem]->systemID . "\n");
         print ($node->arkivdel->mappe[$mappeitem]->mappeID . "\n");
         print ($node->arkivdel->mappe[$mappeitem]->tittel . "\n");
         print ($node->arkivdel->mappe[$mappeitem]->beskrivelse . "\n");
@@ -144,7 +145,7 @@ while ($xml->read()) {
         $mapperesult = upload($baseurl, $token, $mappe, "hateoas-api/arkivstruktur/arkivdel/" . $arkivdeldata->systemID . "/ny-mappe");
         $mappedata = json_decode($mapperesult);
         // FIXME: registrering xsi:type="journalpost"
-        $registrering_items = count($node->arkivdel->mappe[$mappeitem]->registrering);
+        $registrering_items = $node->arkivdel->mappe[$mappeitem]->registrering->count();
         for($registreringitem=0;$registreringitem<$registrering_items;$registreringitem++) {
             $registrering = "{ \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetAv . "\", \"arkivertDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->arkivertDato . "\", \"arkivertAv\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->arkivertAv . "\"}";
             print ("\"registreringsID\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->registreringsID . "\", \"tittel\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->tittel . "\", \"offentligTittel\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->offentligTittel . "\", \"forfatter\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->forfatter . "\", \"journalaar\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalaar . "\", \"journalsekvensnummer\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalsekvensnummer . "\", \"journalpostnummer\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalpostnummer . "\", \"journalposttype\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalposttype . "\", \"journalstatus\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalstatus . "\", \"journaldato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journaldato . "\", \"dokumentetsDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentetsDato . "\", \"mottattDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->mottattDato . "\", \"antallVedlegg\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->antallVedlegg . "\", \"journalEnhet\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalEnhet . "\"}");
@@ -255,7 +256,7 @@ while ($xml->read()) {
         browse($token, $baseurl, $node, $array[$item]['href']);
     }
     // go to next <arkivdel>
-    $xml->next('arkivdel');
+    $xml->next('arkiv');
 }
 $data = create($baseurl, $token);
 print_r($data);
