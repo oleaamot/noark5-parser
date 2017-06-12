@@ -61,7 +61,7 @@ function create($baseurl, $token) {
         'Authorization: ' . $token,
         'Content-Type: application/vnd.noark5-v4+json')
     );
-    curl_exec($ch);
+    // curl_exec($ch);
     $page = curl_exec($ch);
     $data = json_decode($page);
     return $data;
@@ -80,7 +80,26 @@ function upload($baseurl, $token, $data, $href) {
         'Authorization: ' . $token,
         'Content-Type: application/vnd.noark5-v4+json')
     );
-    curl_exec($ch);
+    // curl_exec($ch);
+    $page = curl_exec($ch);
+    var_dump($page);
+    return $page;
+}
+function result($baseurl, $token, $data, $href) {
+    print ("Uploading $data on $baseurl/$href with $token\n");
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $baseurl . $href);
+    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/vnd.noark5-v4+json ',
+        'Authorization: ' . $token,
+        'Content-Type: application/vnd.noark5-v4+json')
+    );
+    // curl_exec($ch);
     $page = curl_exec($ch);
     var_dump($page);
     return $page;
@@ -115,23 +134,25 @@ function browse($token, $baseurl, $node, $href) {
         // browse($token, $baseurl, $node, $array[$item]['href']);
     }
 }
-while ($xml->read()) {
+while ($xml->read() && $xml->name !== 'arkiv');
+while ($xml->name === 'arkiv') {
     $node = simplexml_import_dom($dom->importNode($xml->expand(), true));
     // now you can use $node without going insane about parsing
     var_dump($node);
     $data = json_encode($node);
     $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":\"" . $node->avsluttetDato . "\"}";
-    $arkivresult = upload($baseurl, $token, $arkiv, "hateoas-api/arkivstruktur/ny-arkiv");
+    $arkivresult = result($baseurl, $token, $arkiv, "hateoas-api/arkivstruktur/ny-arkiv");
     $arkivdata = json_decode($arkivresult);
     $arkivskaper = "{ \"arkivskaperID\": \"" . $node->arkivskaper->arkivskaperID . "\", \"arkivskaperNavn\": \"" . $node->arkivskaper->arkivskaperNavn . "\", \"beskrivelse\": \"" . $node->arkivskaper->beskrivelse . "\"}";
-    $arkivskaperresult = upload($baseurl, $token, $arkivskaper, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivskaper");
+    $arkivskaperresult = result($baseurl, $token, $arkivskaper, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivskaper");
     $arkivskaperdata = json_decode($arkivskaperresult);
     $arkivdel = "{ \"tittel\": \"" . $node->arkivdel->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->beskrivelse . "\", \"arkivdelstatus\": \"" . $node->arkivdel->arkivdelstatus . "\", \"dokumentmedium\": \"" . $node->arkivdel->dokumentmedium. "\", \"opprettetDato\": \"" . $node->arkivdel->opprettetDato . "\", \"avsluttetAv\": \"" . $node->arkivdel->avsluttetAv . "\"}";
-    $arkivdelresult = upload($baseurl, $token, $arkivdel, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivdel");
+    $arkivdelresult = result($baseurl, $token, $arkivdel, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivdel");
     $arkivdeldata = json_decode($arkivdelresult);
     // FIXME: mappe xsi:type="saksmappe"
     $mappe_items = $node->arkivdel->mappe->count();
     printf("DEBUG mappe count %d\n", $mappe_items);
+
     for ($mappeitem=0;$mappeitem<$mappe_items;$mappeitem++) {
         print ("iteration num [" . $mappeitem . "] " . $node->arkivdel->mappe[$mappeitem]->systemID . "\n");
         print ($node->arkivdel->mappe[$mappeitem]->mappeID . "\n");
@@ -142,24 +163,24 @@ while ($xml->read()) {
         print ($node->arkivdel->mappe[$mappeitem]->opprettetAv . "\n");
         print ($node->arkivdel->mappe[$mappeitem]->avsluttetAv . "\n");
         $mappe = "{ \"mappeID\": \"" . $node->arkivdel->mappe[$mappeitem]->mappeID . "\", \"tittel\": \"" . $node->arkivdel->mappe[$mappeitem]->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->mappe[$mappeitem]->beskrivelse . "\", \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetAv . "\", \"avsluttetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->avsluttetAv . "\", \"avsluttetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->avsluttetDato . "\"}";
-        $mapperesult = upload($baseurl, $token, $mappe, "hateoas-api/arkivstruktur/arkivdel/" . $arkivdeldata->systemID . "/ny-mappe");
+        $mapperesult = result($baseurl, $token, $mappe, "hateoas-api/arkivstruktur/arkivdel/" . $arkivdeldata->systemID . "/ny-mappe");
         $mappedata = json_decode($mapperesult);
         // FIXME: registrering xsi:type="journalpost"
         $registrering_items = $node->arkivdel->mappe[$mappeitem]->registrering->count();
         for($registreringitem=0;$registreringitem<$registrering_items;$registreringitem++) {
             $registrering = "{ \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetAv . "\", \"arkivertDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->arkivertDato . "\", \"arkivertAv\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->arkivertAv . "\"}";
             print ("\"registreringsID\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->registreringsID . "\", \"tittel\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->tittel . "\", \"offentligTittel\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->offentligTittel . "\", \"forfatter\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->forfatter . "\", \"journalaar\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalaar . "\", \"journalsekvensnummer\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalsekvensnummer . "\", \"journalpostnummer\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalpostnummer . "\", \"journalposttype\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalposttype . "\", \"journalstatus\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalstatus . "\", \"journaldato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journaldato . "\", \"dokumentetsDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentetsDato . "\", \"mottattDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->mottattDato . "\", \"antallVedlegg\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->antallVedlegg . "\", \"journalEnhet\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalEnhet . "\"}");
-            $registreringresult = upload($baseurl, $token, $registrering, "hateoas-api/arkivstruktur/mappe/" . $mappedata->systemID . "/ny-registrering");
+            $registreringresult = result($baseurl, $token, $registrering, "hateoas-api/arkivstruktur/mappe/" . $mappedata->systemID . "/ny-registrering");
             $registreringdata = json_decode($registreringresult);
             /* FIXME: Need to insert \"forfatter\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->forfatter . "\", in dokumentbeskrivelse */
             $dokumentbeskrivelse = "{ \"dokumenttype\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumenttype . "\", \"dokumentstatus\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->beskrivelse . "\", \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->opprettetAv . "\", \"dokumentmedium\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentmedium . "\", \"tilknyttetRegistreringSom\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetRegistreringSom . "\", \"dokumentnummer\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentnummer . "\", \"tilknyttetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetDato . "\", \"tilknyttetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetAv . "\"}";
-            $dokumentbeskrivelseresult = upload($baseurl, $token, $dokumentbeskrivelse, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-dokumentbeskrivelse");
+            $dokumentbeskrivelseresult = result($baseurl, $token, $dokumentbeskrivelse, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-dokumentbeskrivelse");
             $dokumentbeskrivelsedata = json_decode($dokumentbeskrivelseresult);
             $dokumentobjekt = "{ \"versjonsnummer\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->versjonsnummer . "\", \"variantformat\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->variantformat . "\", \"format\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->format . "\", \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetAv . "\", \"referanseDokumentfil\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\", \"referanseDokumentfil\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\", \"sjekksum\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksum . "\", \"sjekksumAlgoritme\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksumAlgoritme . "\", \"filstoerrelse\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->filstoerrelse . "\"}";
-            $dokumentobjektresult = upload($baseurl, $token, $dokumentobjekt, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-dokumentobjekt");
+            $dokumentobjektresult = result($baseurl, $token, $dokumentobjekt, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-dokumentobjekt");
             $dokumentobjektdata = json_decode($dokumentobjektresult);
             $korrespondansepart = "{ 'korrespondanseparttype' : { 'kode' : 'EA' }, 'navn' : '" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepartNavn . "', 'postadresse': { 'adresselinje1' : '" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postadresse . "', 'postnr' : '" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postnummer . "', } 'kontaktinformasjon' : { 'epostadresse' : '" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->epostadresse . "'}, }";
-            $korrespondansepartresult = upload($baseurl, $token, $korrespondansepart, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-korrespondansepartperson");
+            $korrespondansepartresult = result($baseurl, $token, $korrespondansepart, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-korrespondansepartperson");
             $korrespondansepartdata = json_decode($korrespondansepartresult);
             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->korrespondanseparttype . "\n");
             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->korrespondansepartNavn . "\n");
@@ -258,6 +279,12 @@ while ($xml->read()) {
     // go to next <arkivdel>
     $xml->next('arkiv');
 }
+/* $arkivresult = upload($baseurl, $token, $arkiv, "hateoas-api/arkivstruktur/ny-arkiv"); */
+/* $arkivskaperresult = upload($baseurl, $token, $arkivskaper, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivskaper"); */
+/* $mapperesult = upload($baseurl, $token, $mappe, "hateoas-api/arkivstruktur/arkivdel/" . $arkivdeldata->systemID . "/ny-mappe"); */
+/* $registreringresult = upload($baseurl, $token, $registrering, "hateoas-api/arkivstruktur/mappe/" . $mappedata->systemID . "/ny-registrering"); */
+/* $dokumentobjektresult = upload($baseurl, $token, $dokumentobjekt, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-dokumentobjekt"); */
+/* $korrespondansepartresult = upload($baseurl, $token, $korrespondansepart, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-korrespondansepartperson"); */
 $data = create($baseurl, $token);
 print_r($data);
 ?>
