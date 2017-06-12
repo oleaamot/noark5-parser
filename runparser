@@ -22,10 +22,9 @@
 
 wget -q -O arkivstruktur.xml https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/arkivstruktur.xml
 php noark5-parser.php arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
-mkdir -p dokumenter/
-wget -q -O dokumenter/1c555c2e-7f2f-492c-a770-c7bc18c902c6.pdf https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/dokumenter/1c555c2e-7f2f-492c-a770-c7bc18c902c6.pdf
-wget -q -O dokumenter/14305c90-99a2-4444-bb76-63ddae8a2e98.pdf https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/dokumenter/14305c90-99a2-4444-bb76-63ddae8a2e98.pdf
-wget -q -O dokumenter/61677fa2-659b-4200-9438-6c43e4826d3f.pdf https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/dokumenter/61677fa2-659b-4200-9438-6c43e4826d3f.pdf
-wget -q -O dokumenter/1755a60f-c9c0-4943-924f-59a6601484a9.pdf https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/dokumenter/1755a60f-c9c0-4943-924f-59a6601484a9.pdf
+
 wget -q -O arkivverket-arkivstruktur.xml https://raw.githubusercontent.com/arkivverket/arkade5/master/src/Arkivverket.Arkade.Test/TestData/Noark5/ContentClassificationSystem/arkivstruktur.xml
 php noark5-parser.php arkivverket-arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
+
+wget -q -O SesamResearch-arkivstruktur.xml https://raw.githubusercontent.com/SesamResearch/Records-Management-and-Archive-Systems-Research/master/samples/arkivstruktur.xml
+php noark5-parser.php SesamResearch-arkivstruktur.xml http://localhost:8092/noark5v4/ admin password

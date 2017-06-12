@@ -137,7 +137,10 @@ while ($xml->name === 'arkiv') {
     // now you can use $node without going insane about parsing
     var_dump($node);
     $data = json_encode($node);
-    $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":\"" . $node->avsluttetDato . "\"}";
+    if (isset($node->avsluttetDato)) {
+        $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":\"" . $node->avsluttetDato . "\"}"; } else {
+        $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":null }";
+    }
     $arkivresult = result($baseurl, $token, $arkiv, "hateoas-api/arkivstruktur/ny-arkiv");
     $arkivdata = json_decode($arkivresult);
     $arkivskaper = "{ \"arkivskaperID\": \"" . $node->arkivskaper->arkivskaperID . "\", \"arkivskaperNavn\": \"" . $node->arkivskaper->arkivskaperNavn . "\", \"beskrivelse\": \"" . $node->arkivskaper->beskrivelse . "\"}";
@@ -149,7 +152,6 @@ while ($xml->name === 'arkiv') {
     // FIXME: mappe xsi:type="saksmappe"
     $mappe_items = $node->arkivdel->mappe->count();
     printf("DEBUG mappe count %d\n", $mappe_items);
-
     for ($mappeitem=0;$mappeitem<$mappe_items;$mappeitem++) {
         print ("iteration num [" . $mappeitem . "] " . $node->arkivdel->mappe[$mappeitem]->systemID . "\n");
         print ($node->arkivdel->mappe[$mappeitem]->mappeID . "\n");
