@@ -61,7 +61,6 @@ function create($baseurl, $token) {
         'Authorization: ' . $token,
         'Content-Type: application/vnd.noark5-v4+json')
     );
-    // curl_exec($ch);
     $page = curl_exec($ch);
     $data = json_decode($page);
     return $data;
@@ -80,7 +79,6 @@ function upload($baseurl, $token, $data, $href) {
         'Authorization: ' . $token,
         'Content-Type: application/vnd.noark5-v4+json')
     );
-    // curl_exec($ch);
     $page = curl_exec($ch);
     var_dump($page);
     return $page;
@@ -99,7 +97,6 @@ function result($baseurl, $token, $data, $href) {
         'Authorization: ' . $token,
         'Content-Type: application/vnd.noark5-v4+json')
     );
-    // curl_exec($ch);
     $page = curl_exec($ch);
     var_dump($page);
     return $page;
@@ -276,15 +273,9 @@ while ($xml->name === 'arkiv') {
         echo($array[$item]['href'] . "\n");
         browse($token, $baseurl, $node, $array[$item]['href']);
     }
-    // go to next <arkivdel>
+    // go to next <arkiv>
     $xml->next('arkiv');
 }
-/* $arkivresult = upload($baseurl, $token, $arkiv, "hateoas-api/arkivstruktur/ny-arkiv"); */
-/* $arkivskaperresult = upload($baseurl, $token, $arkivskaper, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivskaper"); */
-/* $mapperesult = upload($baseurl, $token, $mappe, "hateoas-api/arkivstruktur/arkivdel/" . $arkivdeldata->systemID . "/ny-mappe"); */
-/* $registreringresult = upload($baseurl, $token, $registrering, "hateoas-api/arkivstruktur/mappe/" . $mappedata->systemID . "/ny-registrering"); */
-/* $dokumentobjektresult = upload($baseurl, $token, $dokumentobjekt, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-dokumentobjekt"); */
-/* $korrespondansepartresult = upload($baseurl, $token, $korrespondansepart, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-korrespondansepartperson"); */
 $data = create($baseurl, $token);
 print_r($data);
 ?>
