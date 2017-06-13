@@ -22,6 +22,9 @@
 
 wget -q -O arkivstruktur.xml https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/arkivstruktur.xml
 php noark5-parser.php arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
+wget -q -O loependeJournal.xml https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/loependeJournal.xml
+wget -q -O offentligJournal.xml https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/offentligJournal.xml
+wget -q -O endringslogg.xml https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/endringslogg.xml
 
 wget -q -O arkivverket-arkivstruktur.xml https://raw.githubusercontent.com/arkivverket/arkade5/master/src/Arkivverket.Arkade.Test/TestData/Noark5/ContentClassificationSystem/arkivstruktur.xml
 php noark5-parser.php arkivverket-arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
