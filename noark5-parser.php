@@ -66,7 +66,7 @@ function create($baseurl, $token) {
     return $data;
 }
 function upload($baseurl, $token, $data, $href) {
-    print ("Uploading $data on $baseurl/$href with $token\n");
+    print ("Uploading $data on $baseurl$href with $token\n");
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $baseurl . $href);
     curl_setopt($ch, CURLOPT_REFERER, $baseurl);
@@ -84,7 +84,7 @@ function upload($baseurl, $token, $data, $href) {
     return $page;
 }
 function result($baseurl, $token, $data, $href) {
-    print ("Uploading $data on $baseurl/$href with $token\n");
+    print ("Uploading $data on $baseurl$href with $token\n");
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $baseurl . $href);
     curl_setopt($ch, CURLOPT_REFERER, $baseurl);
@@ -178,18 +178,42 @@ while ($xml->name === 'arkiv') {
             $dokumentobjekt = "{ \"versjonsnummer\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->versjonsnummer . "\", \"variantformat\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->variantformat . "\", \"format\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->format . "\", \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetAv . "\", \"referanseDokumentfil\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\", \"referanseDokumentfil\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\", \"sjekksum\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksum . "\", \"sjekksumAlgoritme\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksumAlgoritme . "\", \"filstoerrelse\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->filstoerrelse . "\"}";
             $dokumentobjektresult = result($baseurl, $token, $dokumentobjekt, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-dokumentobjekt");
             $dokumentobjektdata = json_decode($dokumentobjektresult);
-            $korrespondansepart = "{ 'korrespondanseparttype' : { 'kode' : 'EA' }, 'navn' : '" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepartNavn . "', 'postadresse': { 'adresselinje1' : '" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postadresse . "', 'postnr' : '" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postnummer . "', } 'kontaktinformasjon' : { 'epostadresse' : '" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->epostadresse . "'}, }";
-            $korrespondansepartresult = result($baseurl, $token, $korrespondansepart, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-korrespondansepartperson");
-            $korrespondansepartdata = json_decode($korrespondansepartresult);
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->korrespondanseparttype . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->korrespondansepartNavn . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postadresse . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postnummer . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->epostadresse . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->telefonnummer . "\n");
-            // print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->kontaktperson . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->administrativEnhet . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->saksbehandler . "\n");
+            print ("DEBUG0\n");
+            print_r($dokumentobjektdata);
+            print ("\nDEBUG0\n");
+            $journalpost = result($baseurl, $token, $dokumentobjekt, "hateoas-api/sakarkiv/journalpost/ny-journalpost");
+            $journalpostdata = json_decode($journalpost);
+            print ("DEBUG1\n");
+            print_r($journalpostdata);
+            print ("\nDEBUG1\n");
+            $saksmappe = result($baseurl, $token, $dokumentobjekt, "hateoas-api/sakarkiv/saksmappe/ny-saksmappe");
+            $saksmappedata = json_decode($saksmappe);
+            print ("DEBUG2\n");
+            print_r($saksmappedata);
+            print ("\nDEBUG2\n");
+            $kp_items = $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->count();
+            print "DEBUG kp_items : " . $kp_items . "\n";
+            for($kpitem=0;$kpitem<$kp_items;$kpitem++) {
+                $korrespondansepart = "{ \"korrespondanseparttype\" : { \"kode\" : \"EA\" }, \"navn\" : \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->korrespondansepartNavn . "\", \"postadresse\": { \"adresselinje1\" : \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->postadresse . "\", \"postnr\" : \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->postnummer . "\"}, \"kontaktinformasjon\" : { \"epostadresse\" : \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->epostadresse . "\"}}";
+                print("\nDEBUG3\n");
+                print("korrespondansepart=");
+                print($korrespondansepart);
+                print("\nDEBUG3\n");
+                $korrespondansepartresult = result($baseurl, $token, $korrespondansepart, "hateoas-api/sakarkiv/journalpost/" . $journalpostdata->systemID . "/ny-korrespondansepartperson");
+                $korrespondansepartdata = json_decode($korrespondansepartresult);
+                print("DEBUG4\n");
+                print_r($korrespondansepartdata);
+                print("\nDEBUG4\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->korrespondanseparttype . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->korrespondansepartNavn . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->postadresse . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->postnummer . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->epostadresse . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->telefonnummer . "\n");
+                // print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->kontaktperson . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->administrativEnhet . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->saksbehandler . "\n");
+            }
             /* // FIXME: mappe xsi:type="saksmappe" */
             // FIXME: registrering xsi:type="journalpost"
             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->systemID . "\n");
