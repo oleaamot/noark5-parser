@@ -1,8 +1,5 @@
 #!/usr/bin/php
 <?php
-
-require_once "controller/LoginController.php";
-require_once "controller/NikitaEntityController.php";
 // MIT License
 //
 // Copyright (c) 2017  Ole Aamot Software
@@ -28,6 +25,12 @@ require_once "controller/NikitaEntityController.php";
 
 
 $xml = new XMLReader();
+
+echo "hello";
+xdebug_break();
+echo "hello";
+
+
 if ($argc > 4) {
     $xml->open($argv[1]);
     $baseurl = $argv[2];
@@ -40,81 +43,127 @@ if ($argc > 4) {
 $dom = new DOMDocument;
 $data = array("username" => $user, "password" => $pass);
 $data_string = json_encode($data);
-
-$loginController = new  LoginController($baseurl);
-$token = $loginController->login($user, $pass);
-
-if (!isset($token)) {
-    echo "Could not login into nikita ... exiting";
-    exit;
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $baseurl . "auth");
+curl_setopt($ch, CURLOPT_REFERER, $baseurl);
+curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    'Content-Type: application/json',
+    'Content-Length: ' . strlen($data_string))
+);
+curl_exec($ch);
+$page = curl_exec($ch);
+$data = json_decode($page);
+$token = $data->{"token"};
+function create($baseurl, $token) {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $baseurl . "hateoas-api/arkivstruktur/arkiv/");
+    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/vnd.noark5-v4+json ',
+        'Authorization: ' . $token,
+        'Content-Type: application/vnd.noark5-v4+json')
+    );
+    $page = curl_exec($ch);
+    $data = json_decode($page);
+    return $data;
+}
+function upload($baseurl, $token, $data, $href) {
+    print ("Uploading $data on $baseurl$href with $token\n");
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $baseurl . $href);
+    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/vnd.noark5-v4+json ',
+        'Authorization: ' . $token,
+        'Content-Type: application/vnd.noark5-v4+json')
+    );
+    $page = curl_exec($ch);
+    var_dump($page);
+    return $page;
+}
+function result($baseurl, $token, $data, $href) {
+    print ("Uploading $data on $baseurl$href with $token\n");
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $baseurl . $href);
+    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/vnd.noark5-v4+json ',
+        'Authorization: ' . $token,
+        'Content-Type: application/vnd.noark5-v4+json')
+    );
+    $page = curl_exec($ch);
+    var_dump($page);
+    return $page;
+}
+function browse($token, $baseurl, $node, $href) {
+    print "Parsing " . $href . "\n";
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $href);
+    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/vnd.noark5-v4+json ',
+        'Authorization: ' . $token,
+        'Content-Type: application/vnd.noark5-v4+json',
+        'Content-Length: ' . strlen($node))
+    );
+    curl_exec($ch);
+    $page = curl_exec($ch);
+    var_dump($page);
+    $site = json_decode($page, true);
+    $array = $site{'_links'};
+    $size = sizeof($array);
+    $item = 0;
+    for ($item=0;$item<$size;$item++) {
+        echo($array[$item]['href'] . "\n");
+        // upload($baseurl, $node, $href);
+        // if ($array[$item]['href'] == "hateoas-api/arkivstruktur/ny-arkiv") {
+        //    print "ny-arkiv";
+        // }
+        // browse($token, $baseurl, $node, $array[$item]['href']);
+    }
 }
 
-echo "Successfully logged onto nikita. Token is " . $token;
 
-$applicationController = new NikitaEntityController($token);
-$applicationData = $applicationController->getData($baseurl);
+function getArkivskaperLinkCreate($arkivData) {
 
-$urlArkivstruktur = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
-
-$arkivstrukturController = new NikitaEntityController($token);
-$arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
-
-$urlCreateFonds = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIV);
-
-$arkivController = new NikitaEntityController($token);
+    $arkivdata = json_decode($arkivData);
+    return "hello";
+}
 
 while ($xml->read() && $xml->name !== 'arkiv');
 while ($xml->name === 'arkiv') {
     $node = simplexml_import_dom($dom->importNode($xml->expand(), true));
     // now you can use $node without going insane about parsing
-
-    // Just for the moment, only pull out tittel and besrkivelse
-    $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\"}";
-
-
-    $arkivresult = $arkivController ->postData($urlCreateFonds, $arkiv);
-
-    // create an arkivskaper
-    $arkivskaper = "{ \"arkivskaperID\": \"" . $node->arkivskaper->arkivskaperID . "\", \"arkivskaperNavn\": \"" .
-        $node->arkivskaper->arkivskaperNavn . "\", \"beskrivelse\": \"" . $node->arkivskaper->beskrivelse . "\"}";
-
-    // Get the address to post to
-    $urlCreateFondsCreator = $arkivController ->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIVSKAPER);
-
-
-    // Create a controller
-    $arkivskaperController = new NikitaEntityController($token);
-
-    // upload the arkivskaper data
-    $arkivskaperresult = $arkivskaperController->postData($urlCreateFondsCreator, $arkivskaper);
-    // Note we do not do anything with this resulting data
-
-
-
-//    exit;
-    // create an arkivdel
-    $arkivdel = "{ \"tittel\": \"" . $node->arkivdel->tittel . "\", \"beskrivelse\": \"" .
-        $node->arkivdel->beskrivelse . "\"}";
-    //Get the link to post the data to
-    $urlCreateSeries = $arkivController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIVDEL);
-
-    //Create the controller
-    $arkivdel = "{ \"tittel\": \"" . $node->arkivdel->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->beskrivelse
-        . "\", \"arkivdelstatus\": \"" . $node->arkivdel->arkivdelstatus . "\", \"dokumentmedium\": \"" .
-        $node->arkivdel->dokumentmedium. "\", \"opprettetDato\": \"" . $node->arkivdel->opprettetDato .
-        "\", \"avsluttetAv\": \"" . $node->arkivdel->avsluttetAv . "\"}";
-
-    $arkivdelController = new NikitaEntityController($token);
-
-    // post the data
-    $arkivdelresult = $arkivdelController->postData($urlCreateSeries, $arkivdel);
-
-
-
-// Only works to here  ...
-exit;
-
-
+    var_dump($node);
+    $data = json_encode($node);
+    if (isset($node->avsluttetDato)) {
+        $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":\"" . $node->avsluttetDato . "\"}"; } else {
+        $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":null }";
+    }
+    $arkivresult = result($baseurl, $token, $arkiv, "hateoas-api/arkivstruktur/ny-arkiv");
+    $arkivdata = json_decode($arkivresult);
+    $arkivskaper = "{ \"arkivskaperID\": \"" . $node->arkivskaper->arkivskaperID . "\", \"arkivskaperNavn\": \"" . $node->arkivskaper->arkivskaperNavn . "\", \"beskrivelse\": \"" . $node->arkivskaper->beskrivelse . "\"}";
+    $arkivskaperresult = result($baseurl, $token, $arkivskaper, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivskaper");
+    $arkivskaperdata = json_decode($arkivskaperresult);
+    $arkivdel = "{ \"tittel\": \"" . $node->arkivdel->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->beskrivelse . "\", \"arkivdelstatus\": \"" . $node->arkivdel->arkivdelstatus . "\", \"dokumentmedium\": \"" . $node->arkivdel->dokumentmedium. "\", \"opprettetDato\": \"" . $node->arkivdel->opprettetDato . "\", \"avsluttetAv\": \"" . $node->arkivdel->avsluttetAv . "\"}";
     $arkivdelresult = result($baseurl, $token, $arkivdel, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivdel");
     $arkivdeldata = json_decode($arkivdelresult);
     // FIXME: mappe xsi:type="saksmappe"
