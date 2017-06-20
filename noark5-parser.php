@@ -4,10 +4,10 @@
  *
  * noark5-parser
  *
- * Copyright (C) 2017  Thomas Sødring
  * Copyright (C) 2017  Ole Aamot
+ * Copyright (C) 2017  Thomas Sødring
  *
- * Author: Ole Aamot <oka@oka.no>
+ * Authors: Ole Aamot <oka@oka.no>, Thomas Sødring <Thomas.Sodring@hioa.no>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
