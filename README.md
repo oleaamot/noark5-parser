@@ -1,6 +1,6 @@
 noark5-parser is a free tool for parsing and importing
-Noark5 XML files licensed under MIT license into the free
-Nikita Noark5 Core project.
+Noark5 XML files into the Nikita Noark5 Core project
+licensed under GNU General Public License version 3.
 
 To test the tool, launch it in a Unix-based Terminal: 
 
