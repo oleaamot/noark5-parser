@@ -30,5 +30,5 @@ wget -q -O endringslogg.xml https://raw.githubusercontent.com/KDRS-SA/noark5-val
 wget -q -O arkivverket-arkivstruktur.xml https://raw.githubusercontent.com/arkivverket/arkade5/master/src/Arkivverket.Arkade.Test/TestData/Noark5/ContentClassificationSystem/arkivstruktur.xml
 php noark5-parser.php arkivverket-arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
 
-#wget -q -O SesamResearch-arkivstruktur.xml https://raw.githubusercontent.com/SesamResearch/Records-Management-and-Archive-Systems-Research/master/samples/arkivstruktur.xml
-#php noark5-parser.php SesamResearch-arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
+wget -q -O SesamResearch-arkivstruktur.xml https://raw.githubusercontent.com/SesamResearch/Records-Management-and-Archive-Systems-Research/master/samples/arkivstruktur.xml
+php noark5-parser.php SesamResearch-arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
