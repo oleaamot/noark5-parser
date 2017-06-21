@@ -152,29 +152,50 @@ $applicationData = $applicationController->getData($baseurl);
 
 $urlArkivstruktur = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
 
+var_dump($urlArkivstruktur);
+
 $arkivstrukturController = new NikitaEntityController($token);
 $arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
 
 $urlCreateFonds = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIV);
 $urlCreateSeries = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIVDEL);
 
-$urlMappestruktur = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_MAPPE);
-$urlCreateFile = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_MAPPE);
+/* $urlCreateSeries = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIVDEL); */
+/* $seriesController = new NikitaEntityController($token); */
+/* $seriesData = $seriesController->getData($urlCreateSeries); */
 
-$urlCreateRecords = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_REGISTRERING);
-$urlRegistrering = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_REGISTRERING);
+/* $urlMappestruktur = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_MAPPE); */
+/* $mappeController = new NikitaEntityController($token); */
+/* $mappeData = $mappeController->getData($urlMappestruktur); */
 
-$urlCreateDocument = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_DOKUMENTOBJEKT);
-$urlRegistrering = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_DOKUMENTOBJEKT);
+/* $urlCreateFile = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_MAPPE); */
+/* $fileController = new NikitaEntityController($token); */
+/* $fileData = $fileController->getData($urlCreateFile); */
 
-var_dump($urlCreateFonds);
-var_dump($urlCreateSeries);
-var_dump($urlMappestruktur);
-var_dump($urlCreateFile);
-var_dump($urlCreateRecords);
-var_dump($urlRegistrering);
-var_dump($urlCreateDocument);
-var_dump($urlRegistrering);
+/* $urlCreateRecords = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_REGISTRERING); */
+/* $recordController = new NikitaEntityController($token); */
+/* $recordsData = $recordController->getData($urlCreateRecords); */
+
+/* $urlRegistrering = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_REGISTRERING); */
+/* $registreringController = new NikitaEntityController($token); */
+/* $registreringData = $registreringController->getData($urlRegistrering); */
+
+/* $urlCreateDocument = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_DOKUMENTOBJEKT); */
+/* $documentController = new NikitaEntityController($token); */
+/* $documentData = $documentController->getData($urlCreateDocument); */
+
+/* $urlDocumentObject = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_DOKUMENTOBJEKT); */
+/* $documentobjectController = new NikitaEntityController($token); */
+/* $documentobjectData = $documentobjectController->getData($urlDocumentObject); */
+
+/* var_dump($fondsData); */
+/* var_dump($seriesData); */
+/* var_dump($mappeData); */
+/* var_dump($fileData); */
+/* var_dump($recordsData); */
+/* var_dump($registreringData); */
+/* var_dump($documentData); */
+/* var_dump($documentobjectData); */
 
 $arkivController = new NikitaEntityController($token);
 
@@ -216,9 +237,7 @@ while ($xml->name === 'arkiv') {
     $arkivskaperresult = $arkivskaperController->postData($urlCreateFondsCreator, $arkivskaper);
     // Note we do not do anything with this resulting data
 
-
-
-//    exit;
+    exit;
     // create an arkivdel
     $arkivdel = "{ \"tittel\": \"" . $node->arkivdel->tittel . "\", \"beskrivelse\": \"" .
         $node->arkivdel->beskrivelse . "\"}";
