@@ -145,7 +145,7 @@ if (!isset($token)) {
     exit;
 }
 
-echo "Successfully logged onto nikita. Token is " . $token;
+echo "Successfully logged onto nikita. Token is " . $token . "\n";
 
 $applicationController = new NikitaEntityController($token);
 $applicationData = $applicationController->getData($baseurl);
