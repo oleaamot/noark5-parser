@@ -32,6 +32,6 @@ class Constants
     const REL_ARKIVSTRUKTUR_NY_REGISTRERING = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-registrering/";
     const REL_ARKIVSTRUKTUR_DOKUMENTBESKRIVELSE = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/dokumentbeskrivelse/";
     const REL_ARKIVSTRUKTUR_NY_DOKUMENTBESKRIVELSE = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-dokumentbeskrivelse/";
-    const REL_ARKIVSTRUKTUR_DOKUMENTOBJECT = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/dokumentobjekt/";
-    const REL_ARKIVSTRUKTUR_NY_DOKUMENTOBJECT = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-dokumentobjekt/";
+    const REL_ARKIVSTRUKTUR_DOKUMENTOBJEKT = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/dokumentobjekt/";
+    const REL_ARKIVSTRUKTUR_NY_DOKUMENTOBJEKT = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-dokumentobjekt/";
 }

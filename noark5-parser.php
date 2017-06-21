@@ -156,9 +156,27 @@ $arkivstrukturController = new NikitaEntityController($token);
 $arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
 
 $urlCreateFonds = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIV);
+$urlCreateSeries = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIVDEL);
+
+$urlMappestruktur = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_MAPPE);
+$urlCreateFile = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_MAPPE);
+
+$urlCreateRecords = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_REGISTRERING);
+$urlRegistrering = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_REGISTRERING);
+
+$urlCreateDocument = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_DOKUMENTOBJEKT);
+$urlRegistrering = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_DOKUMENTOBJEKT);
+
+var_dump($urlCreateFonds);
+var_dump($urlCreateSeries);
+var_dump($urlMappestruktur);
+var_dump($urlCreateFile);
+var_dump($urlCreateRecords);
+var_dump($urlRegistrering);
+var_dump($urlCreateDocument);
+var_dump($urlRegistrering);
 
 $arkivController = new NikitaEntityController($token);
-
 
 while ($xml->read() && $xml->name !== 'arkiv');
 while ($xml->name === 'arkiv') {
@@ -218,6 +236,7 @@ while ($xml->name === 'arkiv') {
     // post the data
     $arkivdelresult = $arkivdelController->postData($urlCreateSeries, $arkivdel);
     // Only works to here  ...
+
 exit;
 
     $arkivdelresult = result($baseurl, $token, $arkivdel, "hateoas-api/arkivstruktur/arkiv/" .
