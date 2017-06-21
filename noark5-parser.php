@@ -1,30 +1,31 @@
 #!/usr/bin/php
 <?php
-/* $id$
- *
- * noark5-parser
- *
- * Copyright (C) 2017  Ole Aamot
- * Copyright (C) 2017  Thomas Sødring
- *
- * Authors: Ole Aamot <oka@oka.no>, Thomas Sødring <Thomas.Sodring@hioa.no>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
-
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
-
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 require_once "controller/LoginController.php";
 require_once "controller/NikitaEntityController.php";
+
+/* $id$
+*
+* noark5-parser
+*
+* Copyright (C) 2017  Ole Aamot
+* Copyright (C) 2017  Thomas Sødring
+*
+* Authors: Ole Aamot <oka@oka.no>, Thomas Sødring <Thomas.Sodring@hioa.no>
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 $xml = new XMLReader();
 if ($argc > 4) {
@@ -39,109 +40,12 @@ if ($argc > 4) {
 $dom = new DOMDocument;
 $data = array("username" => $user, "password" => $pass);
 $data_string = json_encode($data);
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $baseurl . "auth");
-curl_setopt($ch, CURLOPT_REFERER, $baseurl);
-curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-    'Content-Type: application/json',
-    'Content-Length: ' . strlen($data_string))
-);
-curl_exec($ch);
-$page = curl_exec($ch);
-$data = json_decode($page);
-$token = $data->{"token"};
-function create($baseurl, $token) {
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $baseurl . "hateoas-api/arkivstruktur/arkiv/");
-    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Accept: application/vnd.noark5-v4+json ',
-        'Authorization: ' . $token,
-        'Content-Type: application/vnd.noark5-v4+json')
-    );
-    $page = curl_exec($ch);
-    $data = json_decode($page);
-    return $data;
-}
-function upload($baseurl, $token, $data, $href) {
-    print ("Uploading $data on $baseurl$href with $token\n");
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $baseurl . $href);
-    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Accept: application/vnd.noark5-v4+json ',
-        'Authorization: ' . $token,
-        'Content-Type: application/vnd.noark5-v4+json')
-    );
-    $page = curl_exec($ch);
-    var_dump($page);
-    return $page;
-}
-function result($baseurl, $token, $data, $href) {
-    print ("Uploading $data on $baseurl$href with $token\n");
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $baseurl . $href);
-    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Accept: application/vnd.noark5-v4+json ',
-        'Authorization: ' . $token,
-        'Content-Type: application/vnd.noark5-v4+json')
-    );
-    $page = curl_exec($ch);
-    var_dump($page);
-    return $page;
-}
-function browse($token, $baseurl, $node, $href) {
-    print "Parsing " . $href . "\n";
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $href);
-    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Accept: application/vnd.noark5-v4+json ',
-        'Authorization: ' . $token,
-        'Content-Type: application/vnd.noark5-v4+json',
-        'Content-Length: ' . strlen($node))
-    );
-    curl_exec($ch);
-    $page = curl_exec($ch);
-    var_dump($page);
-    $site = json_decode($page, true);
-    $array = $site{'_links'};
-    $size = sizeof($array);
-    $item = 0;
-    for ($item=0;$item<$size;$item++) {
-        echo($array[$item]['href'] . "\n");
-        // upload($baseurl, $node, $href);
-        // if ($array[$item]['href'] == "hateoas-api/arkivstruktur/ny-arkiv") {
-        //    print "ny-arkiv";
-        // }
-        // browse($token, $baseurl, $node, $array[$item]['href']);
-    }
-}
 
 $loginController = new  LoginController($baseurl);
 $token = $loginController->login($user, $pass);
 
 if (!isset($token)) {
-    echo "Could not login into nikita ... exiting";
+    echo "Could not login into nikita ... exiting\n";
     exit;
 }
 
@@ -152,50 +56,10 @@ $applicationData = $applicationController->getData($baseurl);
 
 $urlArkivstruktur = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
 
-var_dump($urlArkivstruktur);
-
 $arkivstrukturController = new NikitaEntityController($token);
 $arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
 
 $urlCreateFonds = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIV);
-$urlCreateSeries = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIVDEL);
-
-/* $urlCreateSeries = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIVDEL); */
-/* $seriesController = new NikitaEntityController($token); */
-/* $seriesData = $seriesController->getData($urlCreateSeries); */
-
-/* $urlMappestruktur = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_MAPPE); */
-/* $mappeController = new NikitaEntityController($token); */
-/* $mappeData = $mappeController->getData($urlMappestruktur); */
-
-/* $urlCreateFile = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_MAPPE); */
-/* $fileController = new NikitaEntityController($token); */
-/* $fileData = $fileController->getData($urlCreateFile); */
-
-/* $urlCreateRecords = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_REGISTRERING); */
-/* $recordController = new NikitaEntityController($token); */
-/* $recordsData = $recordController->getData($urlCreateRecords); */
-
-/* $urlRegistrering = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_REGISTRERING); */
-/* $registreringController = new NikitaEntityController($token); */
-/* $registreringData = $registreringController->getData($urlRegistrering); */
-
-/* $urlCreateDocument = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_DOKUMENTOBJEKT); */
-/* $documentController = new NikitaEntityController($token); */
-/* $documentData = $documentController->getData($urlCreateDocument); */
-
-/* $urlDocumentObject = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_DOKUMENTOBJEKT); */
-/* $documentobjectController = new NikitaEntityController($token); */
-/* $documentobjectData = $documentobjectController->getData($urlDocumentObject); */
-
-/* var_dump($fondsData); */
-/* var_dump($seriesData); */
-/* var_dump($mappeData); */
-/* var_dump($fileData); */
-/* var_dump($recordsData); */
-/* var_dump($registreringData); */
-/* var_dump($documentData); */
-/* var_dump($documentobjectData); */
 
 $arkivController = new NikitaEntityController($token);
 
@@ -203,18 +67,6 @@ while ($xml->read() && $xml->name !== 'arkiv');
 while ($xml->name === 'arkiv') {
     $node = simplexml_import_dom($dom->importNode($xml->expand(), true));
     // now you can use $node without going insane about parsing
-    /* var_dump($node); */
-    /* $data = json_encode($node); */
-    /* if (isset($node->avsluttetDato)) { */
-    /*     $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":\"" . $node->avsluttetDato . "\"}"; } else { */
-    /*     $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\", \"arkivstatus\":\"" . $node->arkivstatus . "\", \"dokumentmedium\":\"" . $node->dokumentmedium . "\", \"opprettetAv\":\"" . $node->opprettetAv . "\", \"opprettetDato\":\"" . $node->opprettetDato . "\", \"avsluttetDato\":null }"; */
-    /* } */
-    /* $arkivresult = result($baseurl, $token, $arkiv, "hateoas-api/arkivstruktur/ny-arkiv"); */
-    /* $arkivdata = json_decode($arkivresult); */
-    /* $arkivskaper = "{ \"arkivskaperID\": \"" . $node->arkivskaper->arkivskaperID . "\", \"arkivskaperNavn\": \"" . $node->arkivskaper->arkivskaperNavn . "\", \"beskrivelse\": \"" . $node->arkivskaper->beskrivelse . "\"}"; */
-    /* $arkivskaperresult = result($baseurl, $token, $arkivskaper, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivskaper"); */
-    /* $arkivskaperdata = json_decode($arkivskaperresult); */
-    /* $arkivdel = "{ \"tittel\": \"" . $node->arkivdel->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->beskrivelse . "\", \"arkivdelstatus\": \"" . $node->arkivdel->arkivdelstatus . "\", \"dokumentmedium\": \"" . $node->arkivdel->dokumentmedium. "\", \"opprettetDato\": \"" . $node->arkivdel->opprettetDato . "\", \"avsluttetAv\": \"" . $node->arkivdel->avsluttetAv . "\"}"; */
 
     // Just for the moment, only pull out tittel and besrkivelse
     $arkiv = "{ \"tittel\": \"" . $node->tittel . "\", \"beskrivelse\":\"" .$node->beskrivelse . "\"}";
@@ -237,7 +89,9 @@ while ($xml->name === 'arkiv') {
     $arkivskaperresult = $arkivskaperController->postData($urlCreateFondsCreator, $arkivskaper);
     // Note we do not do anything with this resulting data
 
-    exit;
+
+
+//    exit;
     // create an arkivdel
     $arkivdel = "{ \"tittel\": \"" . $node->arkivdel->tittel . "\", \"beskrivelse\": \"" .
         $node->arkivdel->beskrivelse . "\"}";
@@ -254,12 +108,14 @@ while ($xml->name === 'arkiv') {
 
     // post the data
     $arkivdelresult = $arkivdelController->postData($urlCreateSeries, $arkivdel);
-    // Only works to here  ...
 
+
+
+// Only works to here  ...
 exit;
 
-    $arkivdelresult = result($baseurl, $token, $arkivdel, "hateoas-api/arkivstruktur/arkiv/" .
-    $arkivdata->systemID . "/ny-arkivdel");
+
+    $arkivdelresult = result($baseurl, $token, $arkivdel, "hateoas-api/arkivstruktur/arkiv/" . $arkivdata->systemID . "/ny-arkivdel");
     $arkivdeldata = json_decode($arkivdelresult);
     // FIXME: mappe xsi:type="saksmappe"
     $mappe_items = $node->arkivdel->mappe->count();
@@ -285,13 +141,11 @@ exit;
             $registreringdata = json_decode($registreringresult);
             /* FIXME: Need to insert \"forfatter\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->forfatter . "\", in dokumentbeskrivelse */
             $dokumentbeskrivelse = "{ \"dokumenttype\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumenttype . "\", \"dokumentstatus\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->beskrivelse . "\", \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->opprettetAv . "\", \"dokumentmedium\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentmedium . "\", \"tilknyttetRegistreringSom\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetRegistreringSom . "\", \"dokumentnummer\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentnummer . "\", \"tilknyttetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetDato . "\", \"tilknyttetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetAv . "\"}";
-            $dokumentbeskrivelseresult = result($baseurl, $token, $dokumentbeskrivelse, "hateoas-api/arkivstruktur/dokumentbeskrivelse/" . $registreringdata->systemID . "/ny-dokumentobjekt");
+            $dokumentbeskrivelseresult = result($baseurl, $token, $dokumentbeskrivelse, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-dokumentbeskrivelse");
             $dokumentbeskrivelsedata = json_decode($dokumentbeskrivelseresult);
-+            $dokumentbeskrivelseresult = result($baseurl, $token, $dokumentbeskrivelse, "hateoas-api/arkivstruktur/dokumentbeskrivelse/" . $registreringdata->systemID . "/ny-dokumentbeskrivelse");
             $dokumentobjekt = "{ \"versjonsnummer\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->versjonsnummer . "\", \"variantformat\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->variantformat . "\", \"format\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->format . "\", \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetAv . "\", \"referanseDokumentfil\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\", \"referanseDokumentfil\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\", \"sjekksum\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksum . "\", \"sjekksumAlgoritme\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksumAlgoritme . "\", \"filstoerrelse\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->filstoerrelse . "\"}";
-            $dokumentobjektresult = result($baseurl, $token, $dokumentobjekt, "hateoas-api/arkivstruktur/dokumentbeskrivelse/" . $registreringdata->systemID . "/ny-dokumentobjekt");
+            $dokumentobjektresult = result($baseurl, $token, $dokumentobjekt, "hateoas-api/arkivstruktur/registrering/" . $registreringdata->systemID . "/ny-dokumentobjekt");
             $dokumentobjektdata = json_decode($dokumentobjektresult);
-            $dokumentobjektresult = result($baseurl, $token, $dokumentobjekt, "hateoas-api/arkivstruktur/dokumentbeskrivelse/" . $registreringdata->systemID . "/ny-dokumentobjekt");
             print ("DEBUG0\n");
             print_r($dokumentobjektdata);
             print ("\nDEBUG0\n");
