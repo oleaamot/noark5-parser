@@ -1,3 +1,5 @@
+all:	check
+
 check: runparser
 	./runparser
 
