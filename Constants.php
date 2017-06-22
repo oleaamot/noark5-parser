@@ -8,6 +8,8 @@
  */
 class Constants
 {
+
+    const COULD_NOT_POST = "Could not post data";
     const GET = "GET";
     const POST = "POST";
     const REL  = "rel";
@@ -26,4 +28,10 @@ class Constants
     const REL_ARKIVSTRUKTUR_ARKIVSKAPER = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/arkivskaper/";
     const REL_ARKIVSTRUKTUR_NY_ARKIV = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-arkiv/";
     const REL_ARKIVSTRUKTUR_NY_ARKIVSKAPER = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-arkivskaper/";
+    const REL_ARKIVSTRUKTUR_MAPPE = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/mappe/";
+    const REL_ARKIVSTRUKTUR_NY_MAPPE = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-mappe/";
+    const REL_ARKIVSTRUKTUR_REGISTRERING = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/registrering/";
+    const REL_ARKIVSTRUKTUR_NY_REGISTRERING = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-registrering/";
+    const REL_ARKIVSTRUKTUR_NY_DOKUMENT_BESKRIVELSE = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-dokumentbeskrivelse/";
+    const REL_ARKIVSTRUKTUR_NY_DOKUMENT_OBJEKT = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-dokumentobjekt/";
 }

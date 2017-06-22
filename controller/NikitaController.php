@@ -32,6 +32,7 @@ class NikitaController
         return false;
     }
 
+
     function getURLFromLinks($rel) {
         return $this->getHrefAssociatedWithRel($rel, $this->links);
     }

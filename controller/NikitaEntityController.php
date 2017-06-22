@@ -12,11 +12,21 @@ require_once "Constants.php";
 class NikitaEntityController extends NikitaController
 {
     private $curlHandler;
+    private $statusCode;
+    private $description = '';
 
     public function __construct($token)
     {
         $this->token = $token;
         $this->curlHandler = curl_init();
+    }
+
+    public function getStatusLastCall() {
+        return $this->statusCode;
+    }
+
+    public function getDescriptionLastCall() {
+       return $this->description;
     }
 
     function postData($url, $data)
@@ -33,8 +43,21 @@ class NikitaEntityController extends NikitaController
                 'Content-Type: application/vnd.noark5-v4+json')
         );
         $result = curl_exec($this->curlHandler);
+        $info = curl_getinfo($this->curlHandler);
+        $this->statusCode = $info['http_code'];
+
         $this->links = json_decode($result, true);
-        return $result;
+        if ($this->statusCode !== 201){
+            $this->description = $result;
+            return false;
+        }
+        elseif ($result === false) {
+            $this->description = $result;
+            return $result;
+        }
+        else {
+            return true;
+        }
     }
 
     function getData($url)
