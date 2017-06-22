@@ -62,268 +62,233 @@ $arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
 
 $urlCreateFonds = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIV);
 
-$arkivController = new NikitaEntityController($token);
 
 $noarkObjectCreator = new NoarkObjectCreator();
 
 while ($xml->read() && $xml->name !== 'arkiv') ;
 while ($xml->name === 'arkiv') {
-    $node = simplexml_import_dom($dom->importNode($xml->expand(), true));
-    // now you can use $node without going insane about parsing
+    $root = simplexml_import_dom($dom->importNode($xml->expand(), true));
+    processFonds($arkivstrukturController, $root, $token, $noarkObjectCreator);
+    $xml->next('arkiv');
+}
 
-    if ($arkivController->postData($urlCreateFonds, $noarkObjectCreator->createArkiv($node)) === true) {
+function processFonds($controller, $arkiv, $token, $noarkObjectCreator)
+{
 
-        // Get the address to post to
-        $urlCreateFondsCreator = $arkivController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIVSKAPER);
-        // Create a controller
-        $arkivskaperController = new NikitaEntityController($token);
-        // upload the arkivskaper data
-        if ($arkivskaperController->postData($urlCreateFondsCreator, $noarkObjectCreator->createArkivskaper($node->arkivskaper)) === true) {
+    $urlCreateFonds = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIV);
+    $arkivController = new NikitaEntityController($token);
+    if ($arkivController->postData($urlCreateFonds, $noarkObjectCreator->createArkiv($arkiv)) === true) {
+        printSuccess("arkiv");
+        if (isset($arkiv->arkivskaper)) {
+            processFondsCreator($arkivController, $arkiv, $token, $noarkObjectCreator);
         }
-
-        //Get the link to post the data to
-        $urlCreateSeries = $arkivController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIVDEL);
-
-        //Create the controller
-        $arkivdelController = new NikitaEntityController($token);
-
-        // post the data
-        if ($arkivdelController->postData($urlCreateSeries, $noarkObjectCreator->createArkivdel($node->arkivdel)) === true) {
-
-            $urlCreateMappe = $arkivdelController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_MAPPE);
-            // FIXME: mappe xsi:type="saksmappe"
-            $mappe_items = $node->arkivdel->mappe->count();
-            printf("DEBUG mappe count %d\n", $mappe_items);
-            for ($mappeitem = 0; $mappeitem < $mappe_items; $mappeitem++) {
-                print ("iteration num [" . $mappeitem . "] " . $node->arkivdel->mappe[$mappeitem]->systemID . "\n");
-                // Create a controller for mappe
-                $mappeController = new NikitaEntityController($token);
-
-                if ($mappeController->postData($urlCreateMappe, $noarkObjectCreator->createMappe($node->arkivdel->mappe[$mappeitem])) === true) {
-                    $registrering_items = $node->arkivdel->mappe[$mappeitem]->registrering->count();
-
-                    $urlCreateRegistrering = $mappeController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_REGISTRERING);
-                    for ($registreringitem = 0; $registreringitem < $registrering_items; $registreringitem++) {
-
-                        // Create a controller for mappe
-                        $registreringController = new NikitaEntityController($token);
-
-                        if (true === $registreringController->postData($urlCreateRegistrering,
-                                $noarkObjectCreator->createRegistrering($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]))
-                        ) {
-
-                            $dokumentBeskrivelse_items = $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->count();
-
-                            $urlCreateDokumentBeskrivelse = $registreringController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_DOKUMENT_BESKRIVELSE);
-                            for ($dokumentBeskrivelseitem = 0; $dokumentBeskrivelseitem < $dokumentBeskrivelse_items; $dokumentBeskrivelseitem++) {
-
-                                // Create a controller for mappe
-                                $dokumentBeskrivelseController = new NikitaEntityController($token);
-
-                                if (true === $dokumentBeskrivelseController->postData($urlCreateDokumentBeskrivelse,
-                                        $noarkObjectCreator->createDokumentBeskrivelse($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse[$dokumentBeskrivelseitem]))
-                                ) {
-
-                                    // Get the address to post to
-                                    $urlCreateDokumentObjekt = $dokumentBeskrivelseController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_DOKUMENT_OBJEKT);
-                                    // Create a controller
-                                    $dokumentObjektController = new NikitaEntityController($token);
-                                    // upload the arkivskaper data
-                                    if ($dokumentObjektController->postData($urlCreateDokumentObjekt, $noarkObjectCreator->createDokumentObjekt(
-                                            $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse[$dokumentBeskrivelseitem]->dokumentobjekt
-                                        )) === true) {
-                                        echo "Hi again! \n";
-                                    }
-                                    else {
-                                        printError("dokumentobjekt", Constants::COULD_NOT_POST,
-                                            $dokumentObjektController->getStatusLastCall(),
-                                            $dokumentObjektController->getDescriptionLastCall());
-                                    }
-
-
-                                } else {
-                                    printError("dokumentBeskrivelse", Constants::COULD_NOT_POST,
-                                        $dokumentBeskrivelseController->getStatusLastCall(),
-                                        $dokumentBeskrivelseController->getDescriptionLastCall());
-                                }
-                            }
-
-                        } else {
-                            printError("registrering", Constants::COULD_NOT_POST,
-                                $registreringController->getStatusLastCall(),
-                                $registreringController->getDescriptionLastCall());
-                        }
-                    }
-                } else {
-                    printError("mappe", Constants::COULD_NOT_POST, $mappeController->getStatusLastCall(),
-                        $mappeController->getDescriptionLastCall());
-                }
-            }
-        } else {
-            printError("arkivdel", Constants::COULD_NOT_POST, $arkivdelController->getStatusLastCall(),
-                $arkivdelController->getDescriptionLastCall());
-        }
+        processAllSeries($arkivController, $arkiv, $token, $noarkObjectCreator);
     } else {
         printError("arkiv", Constants::COULD_NOT_POST, $arkivController->getStatusLastCall(),
             $arkivController->getDescriptionLastCall());
     }
-
-
-// Only works to here  ...
-    exit;
-
-
-// FIXME: mappe xsi:type="saksmappe"
-    $mappe_items = $node->arkivdel->mappe->count();
-    printf("DEBUG mappe count %d\n", $mappe_items);
-    for ($mappeitem = 0; $mappeitem < $mappe_items; $mappeitem++) {
-        print ("iteration num [" . $mappeitem . "] " . $node->arkivdel->mappe[$mappeitem]->systemID . "\n");
-        print ($node->arkivdel->mappe[$mappeitem]->mappeID . "\n");
-        print ($node->arkivdel->mappe[$mappeitem]->tittel . "\n");
-        print ($node->arkivdel->mappe[$mappeitem]->beskrivelse . "\n");
-        print ($node->arkivdel->mappe[$mappeitem]->opprettetDato . "\n");
-        print ($node->arkivdel->mappe[$mappeitem]->avsluttetDato . "\n");
-        print ($node->arkivdel->mappe[$mappeitem]->opprettetAv . "\n");
-        print ($node->arkivdel->mappe[$mappeitem]->avsluttetAv . "\n");
-        $mappe = "{ \"mappeID\": \"" . $node->arkivdel->mappe[$mappeitem]->mappeID . "\", \"tittel\": \"" . $node->arkivdel->mappe[$mappeitem]->tittel . "\", \"beskrivelse\": \"" . $node->arkivdel->mappe[$mappeitem]->beskrivelse . "\", \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetAv . "\", \"avsluttetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->avsluttetAv . "\", \"avsluttetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->avsluttetDato . "\"}";
-        $mapperesult = result($baseurl, $token, $mappe, "hateoas-api/arkivstruktur/arkivdel/" . $arkivdeldata->systemID . "/ny-mappe");
-        $mappedata = json_decode($mapperesult);
-        // FIXME: registrering xsi:type="journalpost"
-        $registrering_items = $node->arkivdel->mappe[$mappeitem]->registrering->count();
-        for ($registreringitem = 0; $registreringitem < $registrering_items; $registreringitem++) {
-            $registrering = "{ \"opprettetDato\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetDato . "\", \"opprettetAv\": \"" . $node->arkivdel->mappe[$mappeitem]->opprettetAv . "\", \"arkivertDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->arkivertDato . "\", \"arkivertAv\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->arkivertAv . "\"}";
-            print ("\"registreringsID\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->registreringsID . "\", \"tittel\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->tittel . "\", \"offentligTittel\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->offentligTittel . "\", \"forfatter\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->forfatter . "\", \"journalaar\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalaar . "\", \"journalsekvensnummer\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalsekvensnummer . "\", \"journalpostnummer\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalpostnummer . "\", \"journalposttype\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalposttype . "\", \"journalstatus\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalstatus . "\", \"journaldato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journaldato . "\", \"dokumentetsDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentetsDato . "\", \"mottattDato\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->mottattDato . "\", \"antallVedlegg\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->antallVedlegg . "\", \"journalEnhet\": \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalEnhet . "\"}");
-            $registreringresult = result($baseurl, $token, $registrering, "hateoas-api/arkivstruktur/mappe/" . $mappedata->systemID . "/ny-registrering");
-            $registreringdata = json_decode($registreringresult);
-
-            $dokumentobjektdata = json_decode($dokumentobjektresult);
-            print ("DEBUG0\n");
-            print_r($dokumentobjektdata);
-            print ("\nDEBUG0\n");
-            $journalpost = result($baseurl, $token, $dokumentobjekt, "hateoas-api/sakarkiv/journalpost/ny-journalpost");
-            $journalpostdata = json_decode($journalpost);
-            print ("DEBUG1\n");
-            print_r($journalpostdata);
-            print ("\nDEBUG1\n");
-            $saksmappe = result($baseurl, $token, $dokumentobjekt, "hateoas-api/sakarkiv/saksmappe/ny-saksmappe");
-            $saksmappedata = json_decode($saksmappe);
-            print ("DEBUG2\n");
-            print_r($saksmappedata);
-            print ("\nDEBUG2\n");
-            $kp_items = $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->count();
-            print "DEBUG kp_items : " . $kp_items . "\n";
-            for ($kpitem = 0; $kpitem < $kp_items; $kpitem++) {
-                $korrespondansepart = "{ \"korrespondanseparttype\" : { \"kode\" : \"EA\" }, \"navn\" : \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->korrespondansepartNavn . "\", \"postadresse\": { \"adresselinje1\" : \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->postadresse . "\", \"postnr\" : \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->postnummer . "\"}, \"kontaktinformasjon\" : { \"epostadresse\" : \"" . $node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->epostadresse . "\"}}";
-                print("\nDEBUG3\n");
-                print("korrespondansepart=");
-                print($korrespondansepart);
-                print("\nDEBUG3\n");
-                $korrespondansepartresult = result($baseurl, $token, $korrespondansepart, "hateoas-api/sakarkiv/journalpost/" . $journalpostdata->systemID . "/ny-korrespondansepartperson");
-                $korrespondansepartdata = json_decode($korrespondansepartresult);
-                print("DEBUG4\n");
-                print_r($korrespondansepartdata);
-                print("\nDEBUG4\n");
-                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->korrespondanseparttype . "\n");
-                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->korrespondansepartNavn . "\n");
-                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->postadresse . "\n");
-                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->postnummer . "\n");
-                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->epostadresse . "\n");
-                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->telefonnummer . "\n");
-                // print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->kontaktperson . "\n");
-                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->administrativEnhet . "\n");
-                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->saksbehandler . "\n");
-            }
-            /* // FIXME: mappe xsi:type="saksmappe" */
-            // FIXME: registrering xsi:type="journalpost"
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->systemID . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->opprettetDato . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->opprettetAv . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->arkivertDato . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->arkivertAv . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->systemID . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumenttype . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentstatus . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tittel . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->beskrivelse . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->forfatter . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->opprettetDato . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->opprettetAv . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentmedium . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetRegistreringSom . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentnummer . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetDato . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->tilknyttetAv . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->versjonsnummer . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->variantformat . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->format . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetDato . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->opprettetAv . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->referanseDokumentfil . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksum . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->sjekksumAlgoritme . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentbeskrivelse->dokumentobjekt->filstoerrelse . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->registreringsID . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->tittel . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->offentligTittel . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->forfatter . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalaar . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalsekvensnummer . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalpostnummer . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalposttype . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalstatus . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journaldato . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->dokumentetsDato . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->mottattDato . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->antallVedlegg . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->journalenhet . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->korrespondanseparttype . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->korrespondansepartNavn . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postadresse . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->postnummer . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->epostadresse . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->telefonnummer . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->kontaktperson . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->administrativEnhet . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart->saksbehandler . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->avskrivning->avskrivningsdato . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->avskrivning->avskrevetAv . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->avskrivning->avskrivningsmaate . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->saksaar . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->sakssekvensnummer . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->saksdato . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->administrativEnhet . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->saksansvarlig . "\n");
-            print ($node->arkivdel->mappe[$mappeitem]->saksstatus . "\n");
-        }
-    }
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $baseurl);
-    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Accept: application/vnd.noark5-v4+json ',
-            'Authorization: ' . $token,
-            'Content-Type: application/vnd.noark5-v4+json')
-    );
-    curl_exec($ch);
-    $page = curl_exec($ch);
-    var_dump($page);
-    $site = json_decode($page, true);
-    $array = $site{'_links'};
-    $size = sizeof($array);
-    $item = 0;
-    for ($item = 0; $item < $size; $item++) {
-        echo($array[$item]['href'] . "\n");
-        browse($token, $baseurl, $node, $array[$item]['href']);
-    }
-// go to next <arkiv>
-    $xml->next('arkiv');
 }
-$data = create($baseurl, $token);
-print_r($data);
 
+function processFondsCreator($controller, $arkiv, $token, $noarkObjectCreator)
+{
+    $urlCreateFondsCreator = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIVSKAPER);
+    $arkivskaperController = new NikitaEntityController($token);
+    if ($arkivskaperController->postData($urlCreateFondsCreator, $noarkObjectCreator->createArkivskaper($arkiv->arkivskaper)) === true) {
+        printSuccess("arkivskaper");
+    }
+
+}
+
+function processAllSeries($controller, $arkiv, $token, $noarkObjectCreator)
+{
+    $arkivdel_items = $arkiv->arkivdel->count();
+    for ($arkivdelitem = 0; $arkivdelitem < $arkivdel_items; $arkivdelitem++) {
+        print ("arkivdel iteration num [" . $arkivdelitem . "] " . $arkiv->arkivdel[$arkivdelitem]->systemID . "\n");
+        // Create a controller for arkivdel
+        processSeries($controller, $arkiv->arkivdel[$arkivdelitem], $token, $noarkObjectCreator);
+    }
+}
+
+function processSeries($controller, $arkivdel, $token, $noarkObjectCreator)
+{
+    $urlCreateSeries = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIVDEL);
+    $arkivdelController = new NikitaEntityController($token);
+
+    if ($arkivdelController->postData($urlCreateSeries, $noarkObjectCreator->createArkivdel($arkivdel)) === true) {
+
+        printSuccess("arkivdel");
+        if (isset($arkivdel->mappe)) {
+            processAllFile($arkivdelController, $arkivdel, $token, $noarkObjectCreator);
+        } else if (isset($arkivdel->klassifikasjonssystem)) {
+            processAllClassificationSystem($arkivdelController, $arkivdel, $token, $noarkObjectCreator);
+        } else if (isset($arkivdel->registrering)) {
+            processAllRegistration($arkivdelController, $arkivdel, $token, $noarkObjectCreator);
+        }
+    } else {
+        printError("arkivdel", Constants::COULD_NOT_POST, $arkivdelController->getStatusLastCall(),
+            $arkivdelController->getDescriptionLastCall());
+    }
+}
+
+function processAllClassificationSystem($controller, $arkivdel, $token, $noarkObjectCreator)
+{
+    $klassifikasjonssystem_items = $arkivdel->klassifikasjonssystem->count();
+    for ($klassifikasjonssystemitem = 0; $klassifikasjonssystemitem < $klassifikasjonssystem_items;
+         $klassifikasjonssystemitem++) {
+        print ("klassifikasjonssystem iteration num [" . $klassifikasjonssystemitem . "] " .
+            $arkivdel->klassifikasjonssystem[$klassifikasjonssystemitem]->systemID . "\n");
+        // Create a controller for klassifikasjonssystem
+        processClassificationSystem($controller, $arkivdel->klassifikasjonssystem[$klassifikasjonssystemitem],
+            $token, $noarkObjectCreator);
+    }
+}
+
+function processClassificationSystem($controller, $klassifikasjonssystem, $token, $noarkObjectCreator)
+{
+    $urlCreateClassificationSystem = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_KLASSIFIKASJONSSYSTEM);
+    $klassifikasjonssystemController = new NikitaEntityController($token);
+
+    if ($klassifikasjonssystemController->postData($urlCreateClassificationSystem,
+            $noarkObjectCreator->createKlassifikasjonssystem($klassifikasjonssystem)) === true
+    ) {
+        printSuccess("klassifikasjonsystem");
+        processAllClass($klassifikasjonssystemController, $klassifikasjonssystem, $token, $noarkObjectCreator);
+    } else {
+        printError("klassifikasjonssystem", Constants::COULD_NOT_POST, $klassifikasjonssystemController->getStatusLastCall(),
+            $klassifikasjonssystemController->getDescriptionLastCall());
+    }
+}
+
+function processAllClass($controller, $arkivdel, $token, $noarkObjectCreator)
+{
+    $klasse_items = $arkivdel->klasse->count();
+    for ($klasseitem = 0; $klasseitem < $klasse_items;
+         $klasseitem++) {
+        print ("klasse iteration num [" . $klasseitem . "] " .
+            $arkivdel->klasse[$klasseitem]->systemID . "\n");
+        // Create a controller for klasse
+        processClass($controller, $arkivdel->klasse[$klasseitem],
+            $token, $noarkObjectCreator);
+    }
+}
+
+function processClass($controller, $klasse, $token, $noarkObjectCreator)
+{
+    $urlCreateClass = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_KLASSE);
+    $klasseController = new NikitaEntityController($token);
+
+    if ($klasseController->postData($urlCreateClass,
+            $noarkObjectCreator->createKlasse($klasse)) === true
+    ) {
+        printSuccess("");
+        if (isset($klasse->mappe)) {
+            processAllFiles($klasseController, $klasse, $token, $noarkObjectCreator);
+        } else if (isset($klasse->klasse)) {
+            processAllClass($klasseController, $klasse, $token, $noarkObjectCreator);
+        }
+        processAllFiles($klasseController, $klasse, $token, $noarkObjectCreator);
+    } else {
+        printError("klasse", Constants::COULD_NOT_POST, $klasseController->getStatusLastCall(),
+            $klasseController->getDescriptionLastCall());
+    }
+}
+
+function processAllFile($controller, $arkivdel, $token, $noarkObjectCreator)
+{
+    $mappe_items = $arkivdel->mappe->count();
+    for ($mappeitem = 0; $mappeitem < $mappe_items; $mappeitem++) {
+        print ("iteration num [" . $mappeitem . "] " . $arkivdel->mappe[$mappeitem]->systemID . "\n");
+        // Create a controller for mappe
+        processFile($controller, $arkivdel->mappe[$mappeitem], $token, $noarkObjectCreator);
+    }
+}
+
+function processFile($controller, $mappe, $token, $noarkObjectCreator)
+{
+    $urlCreateMappe = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_MAPPE);
+    $mappeController = new NikitaEntityController($token);
+    if ($mappeController->postData($urlCreateMappe, $noarkObjectCreator->createMappe($mappe)) === true) {
+        printSuccess("mappe");
+        processAllRegistration($mappeController, $mappe, $token, $noarkObjectCreator);
+    } else {
+        printError("mappe", Constants::COULD_NOT_POST, $mappeController->getStatusLastCall(),
+            $mappeController->getDescriptionLastCall());
+    }
+}
+
+function processAllRegistration($controller, $mappe, $token, $noarkObjectCreator)
+{
+    $registrering_items = $registrering_items = $mappe->registrering->count();
+
+    for ($registreringitem = 0; $registreringitem < $registrering_items; $registreringitem++) {
+        processRegistration($controller, $mappe->registrering[$registreringitem], $token, $noarkObjectCreator);
+    }
+}
+
+function processRegistration($controller, $registrering, $token, $noarkObjectCreator)
+{
+    $urlCreateRegistrering = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_REGISTRERING);
+    $registreringController = new NikitaEntityController($token);
+    if (true === $registreringController->postData($urlCreateRegistrering, $noarkObjectCreator->createRegistrering($registrering))) {
+        printSuccess("registrering");
+        processAllDokumentbeskrivelse($registreringController, $registrering, $token, $noarkObjectCreator);
+    } else {
+        printError("registrering", Constants::COULD_NOT_POST,
+            $registreringController->getStatusLastCall(),
+            $registreringController->getDescriptionLastCall());
+    }
+}
+
+
+function processAllDokumentbeskrivelse($controller, $registrering, $token, $noarkObjectCreator)
+{
+    $dokumentBeskrivelse_items = $registrering->dokumentbeskrivelse->count();
+    for ($dokumentBeskrivelseitem = 0; $dokumentBeskrivelseitem < $dokumentBeskrivelse_items; $dokumentBeskrivelseitem++) {
+        processDokumentbeskrivelse($controller, $registrering->dokumentbeskrivelse[$dokumentBeskrivelseitem],
+            $token, $noarkObjectCreator);
+    }
+}
+
+function processDokumentbeskrivelse($controller, $dokumentbeskrivelse, $token, $noarkObjectCreator)
+{
+    $dokumentBeskrivelseController = new NikitaEntityController($token);
+    $urlCreateDokumentBeskrivelse = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_DOKUMENT_BESKRIVELSE);
+    if (true === $dokumentBeskrivelseController->postData($urlCreateDokumentBeskrivelse,
+            $noarkObjectCreator->createDokumentBeskrivelse($dokumentbeskrivelse))
+    ) {
+        printSuccess("dokumentbeskrivelse");
+        processDokumentobjekt($dokumentBeskrivelseController, $dokumentbeskrivelse->dokumentobjekt, $token, $noarkObjectCreator);
+
+    } else {
+        printError("dokumentBeskrivelse", Constants::COULD_NOT_POST,
+            $dokumentBeskrivelseController->getStatusLastCall(),
+            $dokumentBeskrivelseController->getDescriptionLastCall());
+    }
+}
+
+function processDokumentobjekt($controller, $dokumentobjekt, $token, $noarkObjectCreator)
+{
+    $urlCreateDokumentObjekt = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_DOKUMENT_OBJEKT);
+    // Create a controller
+    $dokumentObjektController = new NikitaEntityController($token);
+    // upload the arkivskaper data
+    if ($dokumentObjektController->postData($urlCreateDokumentObjekt,
+            $noarkObjectCreator->createDokumentObjekt($dokumentobjekt)) === true
+    ) {
+        printSuccess("dokumentobjekt");
+    } else {
+        printError("dokumentobjekt", Constants::COULD_NOT_POST,
+            $dokumentObjektController->getStatusLastCall(),
+            $dokumentObjektController->getDescriptionLastCall());
+    }
+}
+
+
+function printSuccess($type)
+{
+    echo "Successfully created an object of type (" . $type . ")" . PHP_EOL;
+
+}
 
 function printError($type, $information, $status, $description)
 {
@@ -334,4 +299,22 @@ function printError($type, $information, $status, $description)
     echo PHP_EOL;
 }
 
+
+/*
+ *
+ *
+ * Add in
+ *     // Get the address to post to
+
+ *
+ *    print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->korrespondanseparttype . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->korrespondansepartNavn . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->postadresse . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->postnummer . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->epostadresse . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->telefonnummer . "\n");
+                // print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->kontaktperson . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->administrativEnhet . "\n");
+                print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->saksbehandler . "\n");
+ */
 ?>

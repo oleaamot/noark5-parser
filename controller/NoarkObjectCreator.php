@@ -14,6 +14,18 @@ class NoarkObjectCreator
             "\", \"beskrivelse\":\"" . $node->beskrivelse . "\"}";
     }
 
+    public function createKlassifikasjonssystem($node)
+    {
+        return "{ \"tittel\": \"" . $node->tittel .
+            "\", \"beskrivelse\":\"" . $node->beskrivelse . "\"}";
+    }
+
+    public function createClass($node)
+    {
+        return "{ \"tittel\": \"" . $node->tittel .
+            "\", \"beskrivelse\":\"" . $node->beskrivelse . "\"}";
+    }
+
     public function createArkivskaper($node)
     {
         return "{ \"arkivskaperID\": \"" . $node->arkivskaperID .
