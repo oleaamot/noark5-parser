@@ -199,7 +199,30 @@ function processAllFile($controller, $arkivdel, $token, $noarkObjectCreator)
     for ($mappeitem = 0; $mappeitem < $mappe_items; $mappeitem++) {
         print ("iteration num [" . $mappeitem . "] " . $arkivdel->mappe[$mappeitem]->systemID . "\n");
         // Create a controller for mappe
-        processFile($controller, $arkivdel->mappe[$mappeitem], $token, $noarkObjectCreator);
+        echo " Mappe type is (" . $arkivdel->mappe[$mappeitem]->attributes('xsi', true)->type . ")";
+        if ($arkivdel->mappe[$mappeitem]->attributes('xsi', true)->type == "saksmappe") {
+            processCaseFile($controller, $arkivdel->mappe[$mappeitem], $token, $noarkObjectCreator);
+        } else if ($arkivdel->mappe[$mappeitem]->attributes('xsi', true)->type == 'moetemappe') {
+            // Implement moetemappe handler
+        }  else if ($arkivdel->mappe[$mappeitem]->attributes('xsi', true)->type == null) {
+            processFile($controller, $arkivdel->mappe[$mappeitem], $token, $noarkObjectCreator);
+        }
+        else {
+            echo "Unknown mappe type discovered. Processing stopped to ensure data is not lost in import" . PHP_EOL;
+        }
+    }
+}
+
+function processCaseFile($controller, $saksmappe, $token, $noarkObjectCreator)
+{
+    $urlCreateSaksmappe = $controller->getURLFromLinks(Constants::REL_SAKARKIV_NY_SAKSMAPPE);
+    $saksmappeController = new NikitaEntityController($token);
+    if ($saksmappeController->postData($urlCreateSaksmappe, $noarkObjectCreator->createSaksmappe($saksmappe)) === true) {
+        printSuccess("saksmappe");
+        processAllRegistration($saksmappeController, $saksmappe, $token, $noarkObjectCreator);
+    } else {
+        printError("saksmappe", Constants::COULD_NOT_POST, $saksmappeController->getStatusLastCall(),
+            $saksmappeController->getDescriptionLastCall());
     }
 }
 
