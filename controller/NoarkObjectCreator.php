@@ -51,6 +51,19 @@ class NoarkObjectCreator
             "\", \"beskrivelse\": \"" . $node->beskrivelse .
             "\"}";
     }
+    public function createSaksmappe($node)
+    {
+        return "{ \"mappeID\": \"" . $node->mappeID .
+            "\", \"tittel\": \"" . $node->tittel .
+            "\", \"beskrivelse\": \"" . $node->beskrivelse .
+            "\", \"saksaar\": \"" . $node->saksaar .
+            "\", \"sakssekvensnummer\": \"" . $node->sakssekvensnummer .
+            "\", \"saksdato\": \"" . $node->saksdato .
+            "\", \"administrativEnhet\": \"" . $node->administrativEnhet .
+            "\", \"saksansvarlig\": \"" . $node-> saksansvarlig .
+            "\", \"saksstatus\": \"" . $node->saksstatus .
+            "\"}";
+    }
 
     public function createRegistrering($node)
     {
