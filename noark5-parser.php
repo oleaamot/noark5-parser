@@ -306,6 +306,22 @@ function processDokumentobjekt($controller, $dokumentobjekt, $token, $noarkObjec
     }
 }
 
+function processKorrespondansePart($controller, $korrespondansepart, $token, $noarkObjectCreator)
+{
+    $urlCreateKorrespondansePart = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_KORRESPONDANSEPART);
+    // Create a dontroller
+    $korrespondansePartController = new NikitaEntityController($token);
+    // upload korrespondansepart data
+    if ($korrespondansePartController->postData($urlCreateKorrespondansePart,
+    $noarkObjectCreator->createKorrespondansePart($korrespondansepart)) == true
+    ) {
+        printSuccess("korrespondansepart");
+    } else {
+        printError("korrespondansepart", Constants::COULD_NOT_POST,
+        $korrespondansePartController->getStatusLastCall(),
+        $korrespondansePartController->getDescriptionLastCall());
+    }
+}
 
 function printSuccess($type)
 {
