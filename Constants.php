@@ -36,6 +36,7 @@ class Constants
     const REL_ARKIVSTRUKTUR_NY_DOKUMENT_OBJEKT = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-dokumentobjekt/";
     const REL_ARKIVSTRUKTUR_NY_KLASSIFIKASJONSSYSTEM = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-klassifikasjonssystem/";
     const REL_ARKIVSTRUKTUR_NY_KLASSE = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-klasse/";
+    const REL_ARKIVSTRUKTUR_NY_KORRESPONDANSEPART = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-korrespondansepart/";
     const REL_SAKARKIV_NY_SAKSMAPPE = "http://rel.kxml.no/noark5/v4/api/sakarkiv/ny-saksmappe/";
     const REL_SAKARKIV_NY_JOURNALPOST = "http://rel.kxml.no/noark5/v4/api/sakarkiv/ny-journalpost/";
 }

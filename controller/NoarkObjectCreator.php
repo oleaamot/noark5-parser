@@ -105,4 +105,28 @@ class NoarkObjectCreator
             "\", \"filstoerrelse\": " . $node->filstoerrelse .
             "}";
     }
+
+    public function createKorrespondansePart($node)
+    {
+        return "{" .
+            "\"korrespondansepartnavn\": \"" . $node->korrespondansepartNavn .
+            "\", \"postadresse\": \"" . $node->postadresse .
+            "\", \"postnummer\": \"" . $node->postnummer .
+            "\", \"epostadresse\": \"" . $node->epostadresse .
+            "\", \"telefonnummer\": \"" . $node->telefonnummer .
+            "\", \"kontaktperson\": \"" . $node->kontaktperson .
+            "\", \"administrativEnhet\": \"" . $node->administrativEnhet .
+            "\", \"saksbehandler\": \"" . $node->saksbehandler .
+            "\"}";
+    }
+    /*     print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->korrespondanseparttype . "\n"); */
+    /*             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->korrespondansepartNavn . "\n"); */
+    /*             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->postadresse . "\n"); */
+    /*             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->postnummer . "\n"); */
+    /*             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->epostadresse . "\n"); */
+    /*             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->telefonnummer . "\n"); */
+    /*             // print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->kontaktperson . "\n"); */
+    /*             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->administrativEnhet . "\n"); */
+    /*             print ($node->arkivdel->mappe[$mappeitem]->registrering[$registreringitem]->korrespondansepart[$kpitem]->saksbehandler . "\n"); */
+    /* } */
 }
