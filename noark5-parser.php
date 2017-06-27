@@ -260,8 +260,16 @@ function processRegistration($controller, $registrering, $token, $noarkObjectCre
             $registreringController->getStatusLastCall(),
             $registreringController->getDescriptionLastCall());
     }
+    $urlCreateKorrespondansePart = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_KORRESPONDANSEPART);
+    if (true == $registreringController->postData($urlCreateKorrespondansePart, $noarkObjectCreator->createKorrespondansePart($registrering))) {
+        printSuccess("korrespondansepart"); 
+        processAllKorrespondansePart($registreringController, $registrering, $token, $noarkObjectCreator);
+    } else {
+        printError("korrespondansepart", Constants::COULD_NOT_POST,
+        $registreringController->getStatusLastCall(),
+        $registreringController->getDescriptionLastCall());
+    }
 }
-
 
 function processAllDokumentbeskrivelse($controller, $registrering, $token, $noarkObjectCreator)
 {
@@ -303,6 +311,13 @@ function processDokumentobjekt($controller, $dokumentobjekt, $token, $noarkObjec
         printError("dokumentobjekt", Constants::COULD_NOT_POST,
             $dokumentObjektController->getStatusLastCall(),
             $dokumentObjektController->getDescriptionLastCall());
+    }
+}
+
+function processAllKorrespondansePart($controller, $registrering, $token, $noarkObjectCreator) {
+    $korrespondansepart_items = $registrering->korrespondansepart->count();
+    for ($korrespondansepart_item = 0; $korrespondansepart_item < $korrespondansepart_items; $korrespondansepart_item++) {
+        processKorrespondansePart($controller, $registrering->korrespondansepart[$korrespondansepart_item], $token, $noarkObjectCreator);
     }
 }
 
