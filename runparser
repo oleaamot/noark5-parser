@@ -21,17 +21,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-wget -q -O arkivstruktur.xml https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/arkivstruktur.xml
-php noark5-parser.php arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
-wget -q -O loependeJournal.xml https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/loependeJournal.xml
-wget -q -O offentligJournal.xml https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/offentligJournal.xml
-wget -q -O endringslogg.xml https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/endringslogg.xml
+type php >/dev/null 2>&1 || { echo >&2 "runparser requires php, but it's not installed.  Run 'apt-get install php7.1-cli' to install it."; exit 1; }
+type xmllint >/dev/null 2>&1 || { echo >&2 "runparser requires xmllint, but it's not installed.  Run 'apt-get install libxml2-utils php7.1-xml' to install it."; exit 1; }
+type curl >/dev/null 2>&1 || { echo >&2 "runparser requires curl, but it's not installed.  Run 'apt-get install curl php7.1-curl' to install it."; exit 1; }
 
-wget -q -O arkivverket-arkivstruktur.xml https://raw.githubusercontent.com/arkivverket/arkade5/master/src/Arkivverket.Arkade.Test/TestData/Noark5/ContentClassificationSystem/arkivstruktur.xml
+curl -s https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/arkivstruktur.xml | xmllint --format - >n5uttrekk-arkivstruktur.xml
+
+php noark5-parser.php n5uttrekk-arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
+
+curl -s https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/loependeJournal.xml | xmllint --format - >n5uttrekk-loependeJournal.xml
+curl -s https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/offentligJournal.xml | xmllint --format - >n5uttrekk-offentligJournal.xml
+curl -s https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/endringslogg.xml | xmllint --format - >n5uttrekk-endringslogg.xml
+
+curl -s https://raw.githubusercontent.com/arkivverket/arkade5/master/src/Arkivverket.Arkade.Test/TestData/Noark5/ContentClassificationSystem/arkivstruktur.xml | xmllint --format - >arkivverket-arkivstruktur.xml
 php noark5-parser.php arkivverket-arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
 
-wget -q -O documaster-arkivstruktur.xml https://raw.githubusercontent.com/documaster/noark-extraction-validator-samples/0.2.0-add-samples/valid-mixed-archive/extraction/arkivstruktur.xml
+curl -s https://raw.githubusercontent.com/documaster/noark-extraction-validator-samples/0.2.0-add-samples/valid-mixed-archive/extraction/arkivstruktur.xml | xmllint --format - >documaster-arkivstruktur.xml
 php noark5-parser.php documaster-arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
 
-wget -q -O SesamResearch-arkivstruktur.xml https://raw.githubusercontent.com/SesamResearch/Records-Management-and-Archive-Systems-Research/master/samples/arkivstruktur.xml
+curl -s https://raw.githubusercontent.com/SesamResearch/Records-Management-and-Archive-Systems-Research/master/samples/arkivstruktur.xml | xmllint --format - >SesamResearch-arkivstruktur.xml
 php noark5-parser.php SesamResearch-arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
