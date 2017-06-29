@@ -31,6 +31,7 @@ require_once "controller/NoarkObjectCreator.php";
 $xml = new XMLWriter();
 if ($argc > 4) {
     $xml->openURI($argv[1]);
+    $xml->setIndent(true);
     $baseurl = $argv[2];
     $user = $argv[3];
     $pass = $argv[4];
@@ -48,6 +49,75 @@ if ($argc > 4) {
     $urlArkivstruktur = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
     $arkivstrukturController = new NikitaEntityController($token);
     $arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
+    $xml->startDocument('1.0','UTF-8');
+    $xml->startElement('arkiv');
+    $xml->writeAttributeNS('xmlns', 'xsi', null, 'http://www.w3.org/2001/XMLSchema-instance');
+    $xml->writeAttributeNS('xmlns', null, null, 'http://www.arkivverket.no/standarder/noark5/arkivstruktur');
+    $xml->writeAttributeNS('xmlns', 'n5mdk', null, 'http://www.arkivverket.no/standarder/noark5/metadatakatalog');
+    $xml->writeAttributeNS('xsi', 'schemaLocation', null, 'http://www.arkivverket.no/standarder/noark5/arkivstruktur arkivstruktur.xsd');
+    $memxml = new XMLWriter();
+    $memxml->openMemory();
+    $memxml->setIndent(true);
+
+    $memxml->startElement('systemID');
+    $memxml->text('element');
+    $memxml->endElement();
+
+    $memxml->startElement('tittel');
+    $memxml->text('element');
+    $memxml->endElement();
+
+    $memxml->startElement('beskrivelse');
+    $memxml->text('element');
+    $memxml->endElement();
+
+    $memxml->startElement('arkivstatus');
+    $memxml->text('element');
+    $memxml->endElement();
+
+    $memxml->startElement('dokumentmedium');
+    $memxml->text('element');
+    $memxml->endElement();
+
+    $memxml->startElement('opprettetDato');
+    $memxml->text('element');
+    $memxml->endElement();
+
+    $memxml->startElement('opprettetAv');
+    $memxml->text('element');
+    $memxml->endElement();
+
+    $memxml->startElement('avsluttetDato');
+    $memxml->text('element');
+    $memxml->endElement();
+
+    $memxml->startElement('avsluttetAv');
+    $memxml->text('element');
+    $memxml->endElement();
+
+    $memxml->startElement('arkivskaper');
+    $memxml->startElement('arkivskaperID');
+    $memxml->text('arkivskaperID');
+    $memxml->endElement();
+    $memxml->startElement('arkivskaperNavn');
+    $memxml->text('arkivskaperNavn');
+    $memxml->endElement();
+    $memxml->startElement('beskrivelse');
+    $memxml->text('beskrivelse');
+    $memxml->endElement();
+    $memxml->endElement();
+
+    $memxml->startElement('arkivdel');
+    $memxml->text('beskrivelse');
+    $memxml->endElement();
+
+    $xmlstr = $memxml->outputMemory(true);
+    $xml->writeRaw($xmlstr);
+
+    $memxml->flush();
+    unset($memxml);
+    $xml->endElement();
+    $xml->endDocument();
     var_dump($arkivstrukturData);
 } else {
     echo "noark5-export.php FILE BASEURL USER PASS\n";
