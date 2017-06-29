@@ -3,7 +3,7 @@
 
 /* $id$
  *
- * noark5-parser
+ * noark5-export
  *
  * Copyright (C) 2017  Ole Aamot
  * Copyright (C) 2017  Thomas Sødring
@@ -28,42 +28,29 @@ require_once "controller/LoginController.php";
 require_once "controller/NikitaEntityController.php";
 require_once "controller/NoarkObjectCreator.php";
 
-$baseurl = "http://localhost:8092/noark5v4/";
-$user = "admin";
-$pass = "password";
-$data = array("username" => $user, "password" => $pass);
-$data_string = json_encode($data);
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $baseurl . "auth");
-curl_setopt($ch, CURLOPT_REFERER, $baseurl);
-curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-    'Content-Type: application/json',
-    'Content-Length: ' . strlen($data_string))
-);
-curl_exec($ch);
-$page = curl_exec($ch);
-$data = json_decode($page);
-$token = $data->{"token"};
-function create($baseurl, $token) {
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $baseurl . "hateoas-api/arkivstruktur/arkiv/");
-    curl_setopt($ch, CURLOPT_REFERER, $baseurl);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'noark5-parser/0.1');
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Accept: application/vnd.noark5-v4+json ',
-        'Authorization: ' . $token,
-        'Content-Type: application/vnd.noark5-v4+json')
-    );
-    $page = curl_exec($ch);
-    $data = json_decode($page);
-    return $data;
+$xml = new XMLWriter();
+if ($argc > 4) {
+    $xml->openURI($argv[1]);
+    $baseurl = $argv[2];
+    $user = $argv[3];
+    $pass = $argv[4];
+    $data = array("username" => $user, "password" => $pass);
+    $data_string = json_encode($data);
+    $loginController = new LoginController($baseurl);
+    $token = $loginController->login($user, $pass);
+    if (!isset($token)) {
+        echo "Could not login into nikita ... exiting";
+        exit;
+    }
+    echo "Successfully logged onto nikita. Token is " . $token;
+    $applicationController = new NikitaEntityController($token);
+    $applicationData = $applicationController->getData($baseurl);
+    $urlArkivstruktur = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
+    $arkivstrukturController = new NikitaEntityController($token);
+    $arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
+    var_dump($arkivstrukturData);
+} else {
+    echo "noark5-export.php FILE BASEURL USER PASS\n";
+    exit(0);
 }
-$data = create("http://localhost:8092/noark5v4/", $token);
-var_dump($data);
 ?>
