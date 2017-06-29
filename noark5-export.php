@@ -39,10 +39,10 @@ if ($argc > 4) {
     $loginController = new LoginController($baseurl);
     $token = $loginController->login($user, $pass);
     if (!isset($token)) {
-        echo "Could not login into nikita ... exiting";
+        echo "Could not login into nikita ... exiting\n";
         exit;
     }
-    echo "Successfully logged onto nikita. Token is " . $token;
+    echo "Successfully logged onto nikita. Token is " . $token . "\n";
     $applicationController = new NikitaEntityController($token);
     $applicationData = $applicationController->getData($baseurl);
     $urlArkivstruktur = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
