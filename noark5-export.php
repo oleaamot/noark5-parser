@@ -106,14 +106,37 @@ if ($argc > 4) {
     $memxml->text('beskrivelse');
     $memxml->endElement();
     $memxml->endElement();
-
     $memxml->startElement('arkivdel');
+    $memxml->startElement('systemID');
+    $memxml->text('systemID');
+    $memxml->endElement();
+    $memxml->startElement('tittel');
+    $memxml->text('tittel');
+    $memxml->endElement();
+    $memxml->startElement('beskrivelse');
     $memxml->text('beskrivelse');
     $memxml->endElement();
-
+    $memxml->startElement('arkivdelstatus');
+    $memxml->text('arkivdelstatus');
+    $memxml->endElement();
+    $memxml->startElement('dokumentmedium');
+    $memxml->text('dokumentmedium');
+    $memxml->endElement();
+    $memxml->startElement('opprettetDato');
+    $memxml->text('opprettetDato');
+    $memxml->endElement();
+    $memxml->startElement('opprettetAv');
+    $memxml->text('opprettetAv');
+    $memxml->endElement();
+    $memxml->startElement('avsluttetDato');
+    $memxml->text('avsluttetDato');
+    $memxml->endElement();
+    $memxml->startElement('avsluttetAv');
+    $memxml->text('avsluttetAv');
+    $memxml->endElement();
+    $memxml->endElement();
     $xmlstr = $memxml->outputMemory(true);
     $xml->writeRaw($xmlstr);
-
     $memxml->flush();
     unset($memxml);
     $xml->endElement();
