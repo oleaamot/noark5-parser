@@ -39,4 +39,5 @@ class Constants
     const REL_ARKIVSTRUKTUR_NY_KORRESPONDANSEPART = "http://rel.kxml.no/noark5/v4/api/arkivstruktur/ny-korrespondansepart/";
     const REL_SAKARKIV_NY_SAKSMAPPE = "http://rel.kxml.no/noark5/v4/api/sakarkiv/ny-saksmappe/";
     const REL_SAKARKIV_NY_JOURNALPOST = "http://rel.kxml.no/noark5/v4/api/sakarkiv/ny-journalpost/";
+    const REL_METADATA_DOKUMENTMEDIUM = "http://rel.kxml.no/noark5/v4/api/metadata/dokumentmedium/";
 }

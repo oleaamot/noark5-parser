@@ -28,8 +28,280 @@ require_once "controller/LoginController.php";
 require_once "controller/NikitaEntityController.php";
 require_once "controller/NoarkObjectCreator.php";
 
-$xml = new XMLWriter();
+function printSuccess($type)
+{
+    echo "Successfully created an object of type (" . $type . ")" . PHP_EOL;
+}
+
+function printError($type, $information, $status, $description)
+{
+    echo "Could not create an object of type (" . $type . "). Reason (" . $information . ")";
+    if (isset($status) && isset($description)) {
+        echo "nikita returned status (" . $status . "), description (" . $description . ")";
+    }
+    echo PHP_EOL;
+}
+
+function processFondsCreator($controller, $arkiv, $token)
+{
+    global $xml;
+    $xml->startElement('arkivskaper');
+    $urlarkivSkaperData = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_ARKIVSKAPER);
+    $arkivSkaperDataController = new NikitaEntityController($token);
+    $arkivSkaperData = $arkivSkaperDataController->getData($urlarkivSkaperData);
+    printSuccess("arkivskaper");
+    $xml->startElement('arkivskaperID');
+    $xml->text($arkiv['arkivskaperID']);
+    $xml->endElement();
+    $xml->startElement('arkivskaperNavn');
+    $xml->text($arkiv['arkivskaperNavn']);
+    $xml->endElement();
+    $xml->startElement('beskrivelse');
+    $xml->text($arkiv['beskrivelse']);
+    $xml->endElement();
+    $xml->endElement();
+}
+
+function processFolder($controller, $arkiv, $token) {
+    global $xml;
+    $urlmappeData = $arkivDelDataController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_MAPPE);
+    $mappeController = new NikitaEntityController($token);
+    $mappeData = $mappeController->getData($urlmappeData);
+    // FIXME: NULL output
+    $xml->startElement('mappe');
+    $xml->WriteAttribute('xsi:type', 'saksmappe');
+    $xml->startElement('systemID');
+    $xml->text($arkiv['systemID']);
+    $xml->endElement();
+    $xml->startElement('mappeID');
+    $xml->text($arkiv['mappeID']);
+    $xml->endElement();
+    $xml->startElement('tittel');
+    $xml->text($arkiv['tittel']);
+    $xml->endElement();
+    $xml->startElement('beskrivelse');
+    $xml->text($arkiv['beskrivelse']);
+    $xml->endElement();
+    $xml->startElement('opprettetDato');
+    $xml->text($arkiv['opprettetDato']);
+    $xml->endElement();
+    $xml->startElement('opprettetAv');
+    $xml->text($arkiv['opprettetAv']);
+    $xml->endElement();
+    $xml->startElement('avsluttetDato');
+    $xml->text($arkiv['avsluttetDato']);
+    $xml->endElement();
+    $xml->startElement('avsluttetAv');
+    $xml->text($arkiv['avsluttetAv']);
+    $xml->endElement();
+    $xml->endElement();
+}
+
+function processAllSeries($controller, $arkiv, $token)
+{
+    processSeries($controller, $arkiv, $token);
+}
+
+function processSeries($controller, $arkiv, $token)
+{
+    global $xml;
+    $xml->startElement('arkivdel');
+    $xml->startElement('systemID');
+    $xml->text($arkiv['systemID']);
+    $xml->endElement();
+    $xml->startElement('tittel');
+    $xml->text($arkiv['tittel']);
+    $xml->text('tittel');
+    $xml->endElement();
+    $xml->startElement('beskrivelse');
+    $xml->text($arkiv['beskrivelse']);
+    $xml->endElement();
+    $xml->startElement('arkivdelstatus');
+    $xml->text($arkiv['arkivdelstatus']);
+    $xml->endElement();
+    $xml->startElement('dokumentmedium');
+    $xml->text($arkiv['dokumentmedium']);
+    $xml->endElement();
+    $xml->startElement('opprettetDato');
+    $xml->text($arkiv['opprettetDato']);
+    $xml->endElement();
+    $xml->startElement('opprettetAv');
+    $xml->text($arkiv['opprettetAv']);
+    $xml->endElement();
+    $xml->startElement('avsluttetDato');
+    $xml->text($arkiv['avsluttetDato']);
+    $xml->endElement();
+    $xml->startElement('avsluttetAv');
+    $xml->text($arkiv['avsluttetAv']);
+    $xml->endElement();
+}
+
+function processRegistration($controller, $arkiv, $token)
+{
+    global $xml;
+
+    $urlregistreringData = $mappeController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_REGISTRERING);
+    $registreringController = new NikitaEntityController($token);
+    $registreringData = $registreringController->getData($urlregistreringData);
+    $xml->startElement('registrering');
+    foreach($registreringData["results"] as $registreringResults) {
+        $xml->startElement('registrering');
+        $xml->WriteAttribute('xsi:type', 'journalpost');
+        $xml->startElement('systemID');
+        $xml->text($registreringResults['systemID']);
+        $xml->endElement();
+        $xml->startElement('opprettetDato');
+        $xml->text($registreringResults['opprettetDato']);
+        $xml->endElement();
+        $xml->startElement('opprettetAv');
+        $xml->text($registreringResults['opprettetAv']);
+        $xml->endElement();
+        $xml->startElement('arkivertDato');
+        $xml->text($registreringResults['arkivertDato']);
+        $xml->endElement();
+        $xml->startElement('arkivertAv');
+        $xml->text($registreringResults['arkivertAv']);
+        $xml->endElement();
+        $urldokumentbeskrivelseData = $registreringController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_REGISTRERING);
+        $dokumentbeskrivelseController = new NikitaEntityController($token);
+        $dokumentbeskrivelseData = $dokumentbeskrivelseController->getData($urldokumentbeskrivelseData);
+        $xml->startElement('dokumentbeskrivelse');
+        foreach($dokumentbeskrivelseData["results"] as $dokumentbeskrivelseResult) {
+            $xml->startElement('systemID');
+            $xml->text($dokumentbeskrivelseResults['systemID']);
+            $xml->endElement();
+            $xml->startElement('dokumenttype');
+            $xml->text($dokumentbeskrivelseResults['dokumenttype']);
+            $xml->endElement();
+            $xml->startElement('dokumentstatus');
+            $xml->text($dokumentbeskrivelseResults['dokumentstatus']);
+            $xml->endElement();
+            $xml->startElement('tittel');
+            $xml->text($dokumentbeskrivelseResults['tittel']);
+            $xml->endElement();
+            $xml->startElement('beskrivelse');
+            $xml->text($dokumentbeskrivelseResults['beskrivelse']);
+            $xml->endElement();
+            $xml->startElement('forfatter');
+            $xml->text($dokumentbeskrivelseResults['forfatter']);
+            $xml->endElement();
+            $xml->startElement('opprettetDato');
+            $xml->text($dokumentbeskrivelseResults['opprettetDato']);
+            $xml->endElement();
+            $xml->startElement('opprettetAv');
+            $xml->text($dokumentbeskrivelseResults['opprettetAv']);
+            $xml->endElement();
+            $xml->startElement('dokumentmedium');
+            $xml->text($dokumentbeskrivelseResults['dokumentmedium']);
+            $xml->endElement();
+            $xml->startElement('tilknyttetRegistreringSom');
+            $xml->text($dokumentbeskrivelseResults['tilknyttetRegistreringSom']);
+            $xml->endElement();
+            $xml->startElement('dokumentnummer');
+            $xml->text($dokumentbeskrivelseResults['dokumentnummer']);
+            $xml->endElement();
+            $urldokumentobjektData = $dokumentbeskrivelseController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_REGISTRERING);
+            $dokumentobjektController = new NikitaEntityController($token);
+            $dokumentobjektData = $dokumentobjektController->getData($urldokumentobjektData);
+            $xml->startElement('dokumentobjekt');
+            foreach($dokumentobjektData["results"] as $dokumentobjektResult) {
+                $xml->startElement('versjonsnummer');
+                $xml->text($dokumentobjektResults['versjonsnummer']);
+                $xml->endElement();
+                $xml->startElement('variantformat');
+                $xml->text($dokumentobjektResults['variantformat']);
+                $xml->endElement();
+                $xml->startElement('format');
+                $xml->text($dokumentobjektResults['format']);
+                $xml->endElement();
+                $xml->startElement('opprettetDato');
+                $xml->text($dokumentobjektResults['opprettetDato']);
+                $xml->endElement();
+                $xml->startElement('opprettetAv');
+                $xml->text($dokumentobjektResults['opprettetAv']);
+                $xml->endElement();
+                $xml->startElement('referanseDokumentfil');
+                $xml->text($dokumentobjektResults['referanseDokumentfil']);
+                $xml->endElement();
+                $xml->startElement('sjekksum');
+                $xml->text($dokumentobjektResults['sjekksum']);
+                $xml->endElement();
+                $xml->startElement('sjekksumAlgoritme');
+                $xml->text($dokumentobjektResults['sjekksumAlgoritme']);
+                $xml->endElement();
+                $xml->startElement('filstoerrelse');
+                $xml->text($dokumentobjektResults['filstoerrelse']);
+                $xml->endElement();
+            }
+            $xml->endElement();
+        }
+        $xml->endElement();
+    }
+    $xml->endElement();
+}
+
+function processAll($controller,$arkiv,$token)
+{
+    $urlarkivData = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
+    $arkivController = new NikitaEntityController($token);
+    $arkivData = $arkivController->getData($urlarkivData);
+    var_dump($arkivData);
+    foreach($arkivData["results"] as $arkivResults) {
+        $memxml->startElement('systemID');
+        $memxml->text($arkivResults["systemID"]);
+        $memxml->endElement();
+        $memxml->startElement('tittel');
+        $memxml->text($arkivResults["tittel"]);
+        $memxml->endElement();
+        $memxml->startElement('beskrivelse');
+        $memxml->text($arkivResults["beskrivelse"]);
+        $memxml->endElement();
+        $memxml->startElement('arkivstatus');
+        $memxml->text($arkivResults["arkivstatus"]);
+        $memxml->endElement();
+        $memxml->startElement('dokumentmedium');
+        $memxml->text($arkivResults["dokumentmedium"]);
+        $memxml->endElement();
+        $memxml->startElement('opprettetDato');
+        $memxml->text($arkivResults["opprettetDato"]);
+        $memxml->endElement();
+        $memxml->startElement('opprettetAv');
+        $memxml->text($arkivResults["opprettetAv"]);
+        $memxml->endElement();
+        $memxml->startElement('avsluttetDato');
+        $memxml->text($arkivResults["avsluttetDato"]);
+        $memxml->endElement();
+        $memxml->startElement('avsluttetAv');
+        $memxml->text($arkivResults["avsluttetAv"]);
+        $memxml->endElement();
+    }
+    $urlArkivstruktur = $arkivController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
+    $arkivstrukturController = new NikitaEntityController($token);
+    $arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
+    var_dump($arkivstrukturData);
+    if ($arkivstrukturController->getData($urlArkivstruktur) == true) {
+        printSuccess("arkiv");
+        $urlarkivData = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_ARKIV);
+        $arkivDataController = new NikitaEntityController($token);
+        $arkivData = $arkivDataController->getData($urlarkivData);
+        if (isset($arkivstrukturData->arkivskaper)) {
+            processFondsCreator($arkivDataController, $arkivData, $token);
+        }
+        if (isset($arkivstrukturData->arkivdel)) {
+            processAllSeries($arkivDataController, $arkivData, $token);
+        }
+        if (isset($arkivstrukturData->registrering)) {
+            processRegistration($arkivDataController, $arkivData, $token);
+        }
+        if (isset($arkivstrukturData->arkiv)) {
+            processFonds($arkivDataController, $arkivData, $token);
+        }
+    }
+    var_dump($arkivData);
+}
+
 if ($argc > 4) {
+    $xml = new XMLWriter();
     $xml->openURI($argv[1]);
     $xml->setIndent(true);
     $baseurl = $argv[2];
@@ -41,107 +313,28 @@ if ($argc > 4) {
     $token = $loginController->login($user, $pass);
     if (!isset($token)) {
         echo "Could not login into nikita ... exiting\n";
-        exit;
+        exit(1);
     }
     echo "Successfully logged onto nikita. Token is " . $token . "\n";
     $applicationController = new NikitaEntityController($token);
     $applicationData = $applicationController->getData($baseurl);
-    $urlArkivstruktur = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
-    $arkivstrukturController = new NikitaEntityController($token);
-    $arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
+    processAll($applicationController,$applicationData,$token);
     $xml->startDocument('1.0','UTF-8');
     $xml->startElement('arkiv');
-    $xml->writeAttributeNS('xmlns', 'xsi', null, 'http://www.w3.org/2001/XMLSchema-instance');
-    $xml->writeAttributeNS('xmlns', null, null, 'http://www.arkivverket.no/standarder/noark5/arkivstruktur');
-    $xml->writeAttributeNS('xmlns', 'n5mdk', null, 'http://www.arkivverket.no/standarder/noark5/metadatakatalog');
-    $xml->writeAttributeNS('xsi', 'schemaLocation', null, 'http://www.arkivverket.no/standarder/noark5/arkivstruktur arkivstruktur.xsd');
+    $xml->writeAttribute('xmlns:xsi','http://www.w3.org/2001/XMLSchema-instance');
+    $xml->writeAttribute('xmlns','http://www.arkivverket.no/standarder/noark5/arkivstruktur');
+    $xml->writeAttribute('xmlns:n5mdk','http://www.arkivverket.no/standarder/noark5/metadatakatalog');
+    $xml->writeAttribute('xsi:schemaLocation','http://www.arkivverket.no/standarder/noark5/arkivstruktur arkivstruktur.xsd');
     $memxml = new XMLWriter();
     $memxml->openMemory();
     $memxml->setIndent(true);
-
-    $memxml->startElement('systemID');
-    $memxml->text('element');
-    $memxml->endElement();
-
-    $memxml->startElement('tittel');
-    $memxml->text('element');
-    $memxml->endElement();
-
-    $memxml->startElement('beskrivelse');
-    $memxml->text('element');
-    $memxml->endElement();
-
-    $memxml->startElement('arkivstatus');
-    $memxml->text('element');
-    $memxml->endElement();
-
-    $memxml->startElement('dokumentmedium');
-    $memxml->text('element');
-    $memxml->endElement();
-
-    $memxml->startElement('opprettetDato');
-    $memxml->text('element');
-    $memxml->endElement();
-
-    $memxml->startElement('opprettetAv');
-    $memxml->text('element');
-    $memxml->endElement();
-
-    $memxml->startElement('avsluttetDato');
-    $memxml->text('element');
-    $memxml->endElement();
-
-    $memxml->startElement('avsluttetAv');
-    $memxml->text('element');
-    $memxml->endElement();
-
-    $memxml->startElement('arkivskaper');
-    $memxml->startElement('arkivskaperID');
-    $memxml->text('arkivskaperID');
-    $memxml->endElement();
-    $memxml->startElement('arkivskaperNavn');
-    $memxml->text('arkivskaperNavn');
-    $memxml->endElement();
-    $memxml->startElement('beskrivelse');
-    $memxml->text('beskrivelse');
-    $memxml->endElement();
-    $memxml->endElement();
-    $memxml->startElement('arkivdel');
-    $memxml->startElement('systemID');
-    $memxml->text('systemID');
-    $memxml->endElement();
-    $memxml->startElement('tittel');
-    $memxml->text('tittel');
-    $memxml->endElement();
-    $memxml->startElement('beskrivelse');
-    $memxml->text('beskrivelse');
-    $memxml->endElement();
-    $memxml->startElement('arkivdelstatus');
-    $memxml->text('arkivdelstatus');
-    $memxml->endElement();
-    $memxml->startElement('dokumentmedium');
-    $memxml->text('dokumentmedium');
-    $memxml->endElement();
-    $memxml->startElement('opprettetDato');
-    $memxml->text('opprettetDato');
-    $memxml->endElement();
-    $memxml->startElement('opprettetAv');
-    $memxml->text('opprettetAv');
-    $memxml->endElement();
-    $memxml->startElement('avsluttetDato');
-    $memxml->text('avsluttetDato');
-    $memxml->endElement();
-    $memxml->startElement('avsluttetAv');
-    $memxml->text('avsluttetAv');
-    $memxml->endElement();
-    $memxml->endElement();
     $xmlstr = $memxml->outputMemory(true);
-    $xml->writeRaw($xmlstr);
     $memxml->flush();
     unset($memxml);
+    $xml->writeRaw($xmlstr);
     $xml->endElement();
     $xml->endDocument();
-    var_dump($arkivstrukturData);
+    exit(0);
 } else {
     echo "noark5-export.php FILE BASEURL USER PASS\n";
     exit(0);
