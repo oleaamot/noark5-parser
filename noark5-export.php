@@ -1,6 +1,5 @@
 #!/usr/bin/php
 <?php
-
 /* $id$
  *
  * noark5-export
@@ -23,16 +22,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 require_once "controller/LoginController.php";
 require_once "controller/NikitaEntityController.php";
 require_once "controller/NoarkObjectCreator.php";
-
 function printSuccess($type)
 {
     echo "Successfully created an object of type (" . $type . ")" . PHP_EOL;
 }
-
 function printError($type, $information, $status, $description)
 {
     echo "Could not create an object of type (" . $type . "). Reason (" . $information . ")";
@@ -41,7 +37,6 @@ function printError($type, $information, $status, $description)
     }
     echo PHP_EOL;
 }
-
 function processFondsCreator($controller, $arkiv, $token)
 {
     global $xml;
@@ -61,7 +56,6 @@ function processFondsCreator($controller, $arkiv, $token)
     $xml->endElement();
     $xml->endElement();
 }
-
 function processFolder($controller, $arkiv, $token) {
     global $xml;
     $urlmappeData = $arkivDelDataController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_MAPPE);
@@ -96,12 +90,10 @@ function processFolder($controller, $arkiv, $token) {
     $xml->endElement();
     $xml->endElement();
 }
-
 function processAllSeries($controller, $arkiv, $token)
 {
     processSeries($controller, $arkiv, $token);
 }
-
 function processSeries($controller, $arkiv, $token)
 {
     global $xml;
@@ -135,11 +127,9 @@ function processSeries($controller, $arkiv, $token)
     $xml->text($arkiv['avsluttetAv']);
     $xml->endElement();
 }
-
 function processRegistration($controller, $arkiv, $token)
 {
     global $xml;
-
     $urlregistreringData = $mappeController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_REGISTRERING);
     $registreringController = new NikitaEntityController($token);
     $registreringData = $registreringController->getData($urlregistreringData);
@@ -239,14 +229,74 @@ function processRegistration($controller, $arkiv, $token)
     }
     $xml->endElement();
 }
-
-function processAll($controller,$arkiv,$token)
+function processFonds($controller,$arkiv,$token)
 {
-    $urlarkivData = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
+    $urlArkivstruktur = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
+    $arkivstrukturController = new NikitaEntityController($token);
+    $arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
+    $urlarkivData = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_ARKIV);
     $arkivController = new NikitaEntityController($token);
     $arkivData = $arkivController->getData($urlarkivData);
+    var_dump($arkivstrukturData);
     var_dump($arkivData);
-    foreach($arkivData["results"] as $arkivResults) {
+    if ($arkivstrukturController->getData($urlArkivstruktur) == true) {
+        printSuccess("arkiv");
+        $urlarkivData = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
+        $arkivDataController = new NikitaEntityController($token);
+        $arkivData = $arkivDataController->getData($urlarkivData);
+        if (isset($arkivstrukturData->arkivskaper)) {
+            processFondsCreator($arkivDataController, $arkivData, $token);
+        }
+        if (isset($arkivstrukturData->arkivdel)) {
+            processAllSeries($arkivDataController, $arkivData, $token);
+        }
+        if (isset($arkivstrukturData->registrering)) {
+            processRegistration($arkivDataController, $arkivData, $token);
+        }
+        if (isset($arkivstrukturData->arkiv)) {
+            processFonds($arkivDataController, $arkivData, $token);
+        }
+    }
+    var_dump($arkivData);
+}
+if ($argc > 4) {
+    $xml = new XMLWriter();
+    $xml->openURI($argv[1]);
+    $xml->setIndent(true);
+    $baseurl = $argv[2];
+    $user = $argv[3];
+    $pass = $argv[4];
+    $data = array("username" => $user, "password" => $pass);
+    $data_string = json_encode($data);
+    $loginController = new LoginController($baseurl);
+    $token = $loginController->login($user, $pass);
+    if (!isset($token)) {
+        echo "Could not login into nikita ... exiting\n";
+        exit(1);
+    }
+    echo "Successfully logged onto nikita. Token is " . $token . "\n";
+    $applicationController = new NikitaEntityController($token);
+    $applicationData = $applicationController->getData($baseurl);
+    $xml->startDocument('1.0','UTF-8');
+    $xml->startElement('arkiv');
+    $xml->writeAttribute('xmlns:xsi','http://www.w3.org/2001/XMLSchema-instance');
+    $xml->writeAttribute('xmlns','http://www.arkivverket.no/standarder/noark5/arkivstruktur');
+    $xml->writeAttribute('xmlns:n5mdk','http://www.arkivverket.no/standarder/noark5/metadatakatalog');
+    $xml->writeAttribute('xsi:schemaLocation','http://www.arkivverket.no/standarder/noark5/arkivstruktur arkivstruktur.xsd');
+
+    $urlArkivstruktur = $applicationController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
+    $arkivstrukturController = new NikitaEntityController($token);
+    $arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
+
+    $urlArkiv = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_ARKIV);
+    $arkivController = new NikitaEntityController($token);
+    $arkivData = $arkivController->getData($urlArkiv);
+    
+    $memxml = new XMLWriter();
+    $memxml->openMemory();
+    $memxml->setIndent(true);
+    
+    foreach($arkivData['results'] as $arkivResults) {
         $memxml->startElement('systemID');
         $memxml->text($arkivResults["systemID"]);
         $memxml->endElement();
@@ -275,59 +325,6 @@ function processAll($controller,$arkiv,$token)
         $memxml->text($arkivResults["avsluttetAv"]);
         $memxml->endElement();
     }
-    $urlArkivstruktur = $arkivController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
-    $arkivstrukturController = new NikitaEntityController($token);
-    $arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
-    var_dump($arkivstrukturData);
-    if ($arkivstrukturController->getData($urlArkivstruktur) == true) {
-        printSuccess("arkiv");
-        $urlarkivData = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_ARKIV);
-        $arkivDataController = new NikitaEntityController($token);
-        $arkivData = $arkivDataController->getData($urlarkivData);
-        if (isset($arkivstrukturData->arkivskaper)) {
-            processFondsCreator($arkivDataController, $arkivData, $token);
-        }
-        if (isset($arkivstrukturData->arkivdel)) {
-            processAllSeries($arkivDataController, $arkivData, $token);
-        }
-        if (isset($arkivstrukturData->registrering)) {
-            processRegistration($arkivDataController, $arkivData, $token);
-        }
-        if (isset($arkivstrukturData->arkiv)) {
-            processFonds($arkivDataController, $arkivData, $token);
-        }
-    }
-    var_dump($arkivData);
-}
-
-if ($argc > 4) {
-    $xml = new XMLWriter();
-    $xml->openURI($argv[1]);
-    $xml->setIndent(true);
-    $baseurl = $argv[2];
-    $user = $argv[3];
-    $pass = $argv[4];
-    $data = array("username" => $user, "password" => $pass);
-    $data_string = json_encode($data);
-    $loginController = new LoginController($baseurl);
-    $token = $loginController->login($user, $pass);
-    if (!isset($token)) {
-        echo "Could not login into nikita ... exiting\n";
-        exit(1);
-    }
-    echo "Successfully logged onto nikita. Token is " . $token . "\n";
-    $applicationController = new NikitaEntityController($token);
-    $applicationData = $applicationController->getData($baseurl);
-    processAll($applicationController,$applicationData,$token);
-    $xml->startDocument('1.0','UTF-8');
-    $xml->startElement('arkiv');
-    $xml->writeAttribute('xmlns:xsi','http://www.w3.org/2001/XMLSchema-instance');
-    $xml->writeAttribute('xmlns','http://www.arkivverket.no/standarder/noark5/arkivstruktur');
-    $xml->writeAttribute('xmlns:n5mdk','http://www.arkivverket.no/standarder/noark5/metadatakatalog');
-    $xml->writeAttribute('xsi:schemaLocation','http://www.arkivverket.no/standarder/noark5/arkivstruktur arkivstruktur.xsd');
-    $memxml = new XMLWriter();
-    $memxml->openMemory();
-    $memxml->setIndent(true);
     $xmlstr = $memxml->outputMemory(true);
     $memxml->flush();
     unset($memxml);
