@@ -62,7 +62,6 @@ $arkivstrukturData = $arkivstrukturController->getData($urlArkivstruktur);
 
 $urlCreateFonds = $arkivstrukturController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_NY_ARKIV);
 
-
 $noarkObjectCreator = new NoarkObjectCreator();
 
 while ($xml->read() && $xml->name !== 'arkiv') ;

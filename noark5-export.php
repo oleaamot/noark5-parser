@@ -90,10 +90,6 @@ function processFolder($controller, $arkiv, $token) {
     $xml->endElement();
     $xml->endElement();
 }
-function processAllSeries($controller, $arkiv, $token)
-{
-    processSeries($controller, $arkiv, $token);
-}
 function processSeries($controller, $arkiv, $token)
 {
     global $xml;
@@ -237,27 +233,30 @@ function processFonds($controller,$arkiv,$token)
     $urlarkivData = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_ARKIV);
     $arkivController = new NikitaEntityController($token);
     $arkivData = $arkivController->getData($urlarkivData);
-    var_dump($arkivstrukturData);
-    var_dump($arkivData);
     if ($arkivstrukturController->getData($urlArkivstruktur) == true) {
         printSuccess("arkiv");
         $urlarkivData = $controller->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR);
         $arkivDataController = new NikitaEntityController($token);
         $arkivData = $arkivDataController->getData($urlarkivData);
-        if (isset($arkivstrukturData->arkivskaper)) {
-            processFondsCreator($arkivDataController, $arkivData, $token);
-        }
-        if (isset($arkivstrukturData->arkivdel)) {
-            processAllSeries($arkivDataController, $arkivData, $token);
-        }
-        if (isset($arkivstrukturData->registrering)) {
-            processRegistration($arkivDataController, $arkivData, $token);
-        }
         if (isset($arkivstrukturData->arkiv)) {
             processFonds($arkivDataController, $arkivData, $token);
         }
+        /* FIXME: process arkivskaper */
+        $urlarkivSkaperData = $arkivDataController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_ARKIVSKAPER);
+        $arkivSkaperDataController = new NikitaEntityController($token);
+        $arkivSkaperData = $arkivSkaperDataController->getData($urlarkivSkaperData);
+        if (isset($arkivstrukturData->arkivskaper)) {
+            processFondsCreator($arkivSkaperDataController, $arkivSkaperData, $token);
+        }
+        /* FIXME: process arkivdel */
+        if (isset($arkivstrukturData->arkivdel)) {
+            processSeries($arkivDataController, $arkivData, $token);
+        }
+        /* FIX: process registrering */
+        if (isset($arkivstrukturData->registrering)) {
+            processRegistration($arkivDataController, $arkivData, $token);
+        }
     }
-    var_dump($arkivData);
 }
 if ($argc > 4) {
     $xml = new XMLWriter();
