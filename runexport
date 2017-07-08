@@ -23,4 +23,4 @@
 
 type php >/dev/null 2>&1 || { echo >&2 "runparser requires php, but it's not installed.  Run 'apt-get install php7.1-cli' to install it."; exit 1; }
 
-php noark5-export.php arkivstruktur.xml http://linux:8092/noark5v4/ admin password
+php noark5-export.php arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
