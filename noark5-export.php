@@ -26,7 +26,6 @@ require_once "controller/LoginController.php";
 require_once "controller/NikitaEntityController.php";
 require_once "controller/NoarkObjectCreator.php";
 
-
 function getHrefAssociatedWithRel($rel, $links)
 {
     if ($links != null && is_array($links))
@@ -54,6 +53,55 @@ function printError($type, $information, $status, $description)
     echo PHP_EOL;
 }
 
+function processFolder($controller, $mappe, $token)
+{
+    global $xml;
+    printSuccess("mappe");
+    $xml->startElement('mappe');
+    $xml->WriteAttribute('xsi:type', 'saksmappe');
+    if (isset($mappe['systemID'])) {
+        $xml->startElement('systemID');
+        $xml->text($mappe['systemID']);
+        $xml->endElement();
+    }
+    if (isset($mappe['mappeID'])) {
+        $xml->startElement('mappeID');
+	$xml->text($mappe['mappeID']);
+	$xml->endElement();
+    }
+    if (isset($mappe['tittel'])) {
+      $xml->startElement('tittel');
+      $xml->text($mappe['tittel']);
+      $xml->endElement();
+    }
+    if (isset($mappe['beskrivelse'])) {
+      $xml->startElement('beskrivelse');
+      $xml->text($mappe['beskrivelse']);
+      $xml->endElement();
+    }
+    if (isset($mappe['opprettetDato'])) {
+      $xml->startElement('opprettetDato');
+      $xml->text($mappe['opprettetDato']);
+      $xml->endElement();
+    }
+    if (isset($mappe['opprettetAv'])) {
+      $xml->startElement('opprettetAv');
+      $xml->text($mappe['opprettetAv']);
+      $xml->endElement();
+    }
+    if (isset($mappe['avsluttetDato'])) {
+      $xml->startElement('avsluttetDato');
+      $xml->text($mappe['avsluttetDato']);
+      $xml->endElement();
+    }
+    if (isset($mappe['avsluttetAv'])) {
+      $xml->startElement('avsluttetAv');
+      $xml->text($mappe['avsluttetAv']);
+      $xml->endElement();
+    }
+    $xml->endElement();
+}
+
 function processFondsCreator($controller, $arkivskaper, $token)
 {
     global $xml;
@@ -79,42 +127,6 @@ function processFondsCreator($controller, $arkivskaper, $token)
         $xml->endElement();
     }
 
-    $xml->endElement();
-}
-
-function processFolder($controller, $arkiv, $token)
-{
-    global $xml;
-    $urlmappeData = $arkivDelDataController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_MAPPE);
-    $mappeController = new NikitaEntityController($token);
-    $mappeData = $mappeController->getData($urlmappeData);
-    // FIXME: NULL output
-    $xml->startElement('mappe');
-    $xml->WriteAttribute('xsi:type', 'saksmappe');
-    $xml->startElement('systemID');
-    $xml->text($arkiv['systemID']);
-    $xml->endElement();
-    $xml->startElement('mappeID');
-    $xml->text($arkiv['mappeID']);
-    $xml->endElement();
-    $xml->startElement('tittel');
-    $xml->text($arkiv['tittel']);
-    $xml->endElement();
-    $xml->startElement('beskrivelse');
-    $xml->text($arkiv['beskrivelse']);
-    $xml->endElement();
-    $xml->startElement('opprettetDato');
-    $xml->text($arkiv['opprettetDato']);
-    $xml->endElement();
-    $xml->startElement('opprettetAv');
-    $xml->text($arkiv['opprettetAv']);
-    $xml->endElement();
-    $xml->startElement('avsluttetDato');
-    $xml->text($arkiv['avsluttetDato']);
-    $xml->endElement();
-    $xml->startElement('avsluttetAv');
-    $xml->text($arkiv['avsluttetAv']);
-    $xml->endElement();
     $xml->endElement();
 }
 
@@ -182,7 +194,18 @@ function processSeries($controller, $arkivdel, $token)
      * som kan forekomme her.
      */
 
+    $urlGetMappe = getHrefAssociatedWithRel(Constants::REL_ARKIVSTRUKTUR_MAPPE, $arkivdel);
+    $mappeController = new NikitaEntityController($token);
+    $mappeResults = $mappeController->getData($urlGetMappe);
 
+    if ($mappeResults) {
+        // An arkiv object can have multiple arkivdel objects
+        if (isset($mappeResults['results'])) {
+            foreach ($mappeResults['results'] as $mappe) {
+                processFolder($controller, $mappe, $token);
+            }
+        }
+    }
 
     $xml->endElement();
 }
