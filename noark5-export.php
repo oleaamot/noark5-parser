@@ -99,7 +99,20 @@ function processFolder($controller, $mappe, $token)
         $xml->text($mappe['avsluttetAv']);
         $xml->endElement();
     }
-    /* Implement registrering -> korrespondansepart */
+    if (isset($mappe['registrering'])) {
+        $urlGetRegistration = getHrefAssociatedWithRel(Constants::REL_ARKIVSTRUKTUR_REGISTRERING, $mappe);
+        $registrationController = new NikitaEntityController($token);
+        $registrationResults = $registrationController->getData($urlGetRegistration);
+        if ($registrationResults) {
+            // An mappe object can have multiple registrering objects
+            if (isset($registrationResults['results'])) {
+                foreach ($registrationResults['results'] as $registration) {
+                    processRegistration($controller, $registration, $token);
+                }
+            }
+        }
+        /* Implement registrering -> korrespondansepart */
+    }
     if (isset($mappe['saksaar'])) {
         $xml->startElement('saksaar');
         $xml->text($mappe['saksaar']);
@@ -241,109 +254,116 @@ function processSeries($controller, $arkivdel, $token)
     $xml->endElement();
 }
 
-function processRegistration($controller, $arkiv, $token)
+function processRegistration($controller, $registrering, $token)
 {
     global $xml;
-    $urlregistreringData = $mappeController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_REGISTRERING);
-    $registreringController = new NikitaEntityController($token);
-    $registreringData = $registreringController->getData($urlregistreringData);
+    printSuccess("registrering");
     $xml->startElement('registrering');
-    foreach ($registreringData["results"] as $registreringResults) {
-        $xml->startElement('registrering');
-        $xml->WriteAttribute('xsi:type', 'journalpost');
+    $xml->WriteAttribute('xsi:type', 'journalpost');
+    if (isset($registrering['systemID'])) {
         $xml->startElement('systemID');
-        $xml->text($registreringResults['systemID']);
+        $xml->text($registrering['systemID']);
         $xml->endElement();
+    }
+    if (isset($registrering['opprettetDato'])) {
         $xml->startElement('opprettetDato');
-        $xml->text($registreringResults['opprettetDato']);
+        $xml->text($registrering['opprettetDato']);
         $xml->endElement();
+    }
+    if (isset($registrering['opprettetAv'])) {
         $xml->startElement('opprettetAv');
-        $xml->text($registreringResults['opprettetAv']);
+        $xml->text($registrering['opprettetAv']);
         $xml->endElement();
+    }
+    if (isset($registrering['arkivertDato'])) {
         $xml->startElement('arkivertDato');
-        $xml->text($registreringResults['arkivertDato']);
+        $xml->text($registrering['arkivertDato']);
         $xml->endElement();
+    }
+    if (isset($registrering['arkivertAv'])) {
         $xml->startElement('arkivertAv');
-        $xml->text($registreringResults['arkivertAv']);
+        $xml->text($registrering['arkivertAv']);
         $xml->endElement();
-        $urldokumentbeskrivelseData = $registreringController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_REGISTRERING);
-        $dokumentbeskrivelseController = new NikitaEntityController($token);
-        $dokumentbeskrivelseData = $dokumentbeskrivelseController->getData($urldokumentbeskrivelseData);
-        $xml->startElement('dokumentbeskrivelse');
-
-
-        // Denne tilnærming her funker dårlig ....
-        // Det er ikke fleksibel .. Noark er ikke en statisk struktur og da trenger du metode kall
-        // sånn som i andre steder ...
-        foreach ($dokumentbeskrivelseData["results"] as $dokumentbeskrivelseResult) {
-            $xml->startElement('systemID');
-            $xml->text($dokumentbeskrivelseResults['systemID']);
-            $xml->endElement();
-            $xml->startElement('dokumenttype');
-            $xml->text($dokumentbeskrivelseResults['dokumenttype']);
-            $xml->endElement();
-            $xml->startElement('dokumentstatus');
-            $xml->text($dokumentbeskrivelseResults['dokumentstatus']);
-            $xml->endElement();
-            $xml->startElement('tittel');
-            $xml->text($dokumentbeskrivelseResults['tittel']);
-            $xml->endElement();
-            $xml->startElement('beskrivelse');
-            $xml->text($dokumentbeskrivelseResults['beskrivelse']);
-            $xml->endElement();
-            $xml->startElement('forfatter');
-            $xml->text($dokumentbeskrivelseResults['forfatter']);
-            $xml->endElement();
-            $xml->startElement('opprettetDato');
-            $xml->text($dokumentbeskrivelseResults['opprettetDato']);
-            $xml->endElement();
-            $xml->startElement('opprettetAv');
-            $xml->text($dokumentbeskrivelseResults['opprettetAv']);
-            $xml->endElement();
-            $xml->startElement('dokumentmedium');
-            $xml->text($dokumentbeskrivelseResults['dokumentmedium']);
-            $xml->endElement();
-            $xml->startElement('tilknyttetRegistreringSom');
-            $xml->text($dokumentbeskrivelseResults['tilknyttetRegistreringSom']);
-            $xml->endElement();
-            $xml->startElement('dokumentnummer');
-            $xml->text($dokumentbeskrivelseResults['dokumentnummer']);
-            $xml->endElement();
-            $urldokumentobjektData = $dokumentbeskrivelseController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_REGISTRERING);
-            $dokumentobjektController = new NikitaEntityController($token);
-            $dokumentobjektData = $dokumentobjektController->getData($urldokumentobjektData);
-            $xml->startElement('dokumentobjekt');
-            foreach ($dokumentobjektData["results"] as $dokumentobjektResult) {
-                $xml->startElement('versjonsnummer');
-                $xml->text($dokumentobjektResults['versjonsnummer']);
+    }
+    if (isset($registrering['dokumentbeskrivelse'])) {
+        $urlGetDokumentBeskrivelse = getHrefAssociatedWithRel(Constants::REL_ARKIVSTRUKTUR_DOKUMENTBESKRIVELSE, $registrering);
+        $dokumentBeskrivelseController = new NikitaEntityController($token);
+        $dokumentBeskrivelseResults = $mappeController->getData($urlGetDokumentBeskrivelse);
+        if ($dokumentBeskrivelseResults) {
+            $xml->startElement('dokumentbeskrivelse');
+            foreach ($dokumentbeskrivelseData["results"] as $dokumentbeskrivelseResult) {
+                $xml->startElement('systemID');
+                $xml->text($dokumentbeskrivelseResults['systemID']);
                 $xml->endElement();
-                $xml->startElement('variantformat');
-                $xml->text($dokumentobjektResults['variantformat']);
+                $xml->startElement('dokumenttype');
+                $xml->text($dokumentbeskrivelseResults['dokumenttype']);
                 $xml->endElement();
-                $xml->startElement('format');
-                $xml->text($dokumentobjektResults['format']);
+                $xml->startElement('dokumentstatus');
+                $xml->text($dokumentbeskrivelseResults['dokumentstatus']);
+                $xml->endElement();
+                $xml->startElement('tittel');
+                $xml->text($dokumentbeskrivelseResults['tittel']);
+                $xml->endElement();
+                $xml->startElement('beskrivelse');
+                $xml->text($dokumentbeskrivelseResults['beskrivelse']);
+                $xml->endElement();
+                $xml->startElement('forfatter');
+                $xml->text($dokumentbeskrivelseResults['forfatter']);
                 $xml->endElement();
                 $xml->startElement('opprettetDato');
-                $xml->text($dokumentobjektResults['opprettetDato']);
+                $xml->text($dokumentbeskrivelseResults['opprettetDato']);
                 $xml->endElement();
                 $xml->startElement('opprettetAv');
-                $xml->text($dokumentobjektResults['opprettetAv']);
+                $xml->text($dokumentbeskrivelseResults['opprettetAv']);
                 $xml->endElement();
-                $xml->startElement('referanseDokumentfil');
-                $xml->text($dokumentobjektResults['referanseDokumentfil']);
+                $xml->startElement('dokumentmedium');
+                $xml->text($dokumentbeskrivelseResults['dokumentmedium']);
                 $xml->endElement();
-                $xml->startElement('sjekksum');
-                $xml->text($dokumentobjektResults['sjekksum']);
+                $xml->startElement('tilknyttetRegistreringSom');
+                $xml->text($dokumentbeskrivelseResults['tilknyttetRegistreringSom']);
                 $xml->endElement();
-                $xml->startElement('sjekksumAlgoritme');
-                $xml->text($dokumentobjektResults['sjekksumAlgoritme']);
+                $xml->startElement('dokumentnummer');
+                $xml->text($dokumentbeskrivelseResults['dokumentnummer']);
                 $xml->endElement();
-                $xml->startElement('filstoerrelse');
-                $xml->text($dokumentobjektResults['filstoerrelse']);
-                $xml->endElement();
+                $urldokumentobjektData = $dokumentbeskrivelseController->getURLFromLinks(Constants::REL_ARKIVSTRUKTUR_REGISTRERING);
+                $dokumentobjektController = new NikitaEntityController($token);
+                $dokumentobjektData = $dokumentobjektController->getData($urldokumentobjektData);
+                $xml->startElement('dokumentobjekt');
+                foreach ($dokumentobjektData["results"] as $dokumentobjektResult) {
+                    $xml->startElement('versjonsnummer');
+                    $xml->text($dokumentobjektResults['versjonsnummer']);
+                    $xml->endElement();
+                    $xml->startElement('variantformat');
+                    $xml->text($dokumentobjektResults['variantformat']);
+                    $xml->endElement();
+                    $xml->startElement('format');
+                    $xml->text($dokumentobjektResults['format']);
+                    $xml->endElement();
+                    $xml->startElement('opprettetDato');
+                    $xml->text($dokumentobjektResults['opprettetDato']);
+                    $xml->endElement();
+                    $xml->startElement('opprettetAv');
+                    $xml->text($dokumentobjektResults['opprettetAv']);
+                    $xml->endElement();
+                    $xml->startElement('referanseDokumentfil');
+                    $xml->text($dokumentobjektResults['referanseDokumentfil']);
+                    $xml->endElement();
+                    $xml->startElement('sjekksum');
+                    $xml->text($dokumentobjektResults['sjekksum']);
+                    $xml->endElement();
+                    $xml->startElement('sjekksumAlgoritme');
+                    $xml->text($dokumentobjektResults['sjekksumAlgoritme']);
+                    $xml->endElement();
+                    $xml->startElement('filstoerrelse');
+                    $xml->text($dokumentobjektResults['filstoerrelse']);
+                    $xml->endElement();
+                }
             }
             $xml->endElement();
         }
+        // Denne tilnærming her funker dårlig ....
+        // Det er ikke fleksibel .. Noark er ikke en statisk struktur og da trenger du metode kall
+        // sånn som i andre steder ...
         $xml->endElement();
     }
     $xml->endElement();
