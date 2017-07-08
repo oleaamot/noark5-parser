@@ -66,38 +66,69 @@ function processFolder($controller, $mappe, $token)
     }
     if (isset($mappe['mappeID'])) {
         $xml->startElement('mappeID');
-	$xml->text($mappe['mappeID']);
-	$xml->endElement();
+        $xml->text($mappe['mappeID']);
+        $xml->endElement();
     }
     if (isset($mappe['tittel'])) {
-      $xml->startElement('tittel');
-      $xml->text($mappe['tittel']);
-      $xml->endElement();
+        $xml->startElement('tittel');
+        $xml->text($mappe['tittel']);
+        $xml->endElement();
     }
     if (isset($mappe['beskrivelse'])) {
-      $xml->startElement('beskrivelse');
-      $xml->text($mappe['beskrivelse']);
-      $xml->endElement();
+        $xml->startElement('beskrivelse');
+        $xml->text($mappe['beskrivelse']);
+        $xml->endElement();
     }
     if (isset($mappe['opprettetDato'])) {
-      $xml->startElement('opprettetDato');
-      $xml->text($mappe['opprettetDato']);
-      $xml->endElement();
+        $xml->startElement('opprettetDato');
+        $xml->text($mappe['opprettetDato']);
+        $xml->endElement();
     }
     if (isset($mappe['opprettetAv'])) {
-      $xml->startElement('opprettetAv');
-      $xml->text($mappe['opprettetAv']);
-      $xml->endElement();
+        $xml->startElement('opprettetAv');
+        $xml->text($mappe['opprettetAv']);
+        $xml->endElement();
     }
     if (isset($mappe['avsluttetDato'])) {
-      $xml->startElement('avsluttetDato');
-      $xml->text($mappe['avsluttetDato']);
-      $xml->endElement();
+        $xml->startElement('avsluttetDato');
+        $xml->text($mappe['avsluttetDato']);
+        $xml->endElement();
     }
     if (isset($mappe['avsluttetAv'])) {
-      $xml->startElement('avsluttetAv');
-      $xml->text($mappe['avsluttetAv']);
-      $xml->endElement();
+        $xml->startElement('avsluttetAv');
+        $xml->text($mappe['avsluttetAv']);
+        $xml->endElement();
+    }
+    /* Implement registrering -> korrespondansepart */
+    if (isset($mappe['saksaar'])) {
+        $xml->startElement('saksaar');
+        $xml->text($mappe['saksaar']);
+        $xml->endElement();
+    }
+    if (isset($mappe['sakssekvensnummer'])) {
+        $xml->startElement('sakssekvensnummer');
+        $xml->text($mappe['sakssekvensnummer']);
+        $xml->endElement();
+    }
+    if (isset($mappe['saksdato'])) {
+        $xml->startElement('saksdato');
+        $xml->text($mappe['saksdato']);
+        $xml->endElement();
+    }
+    if (isset($mappe['administrativEnhet'])) {
+        $xml->startElement('administrativEnhet');
+        $xml->text($mappe['administrativEnhet']);
+        $xml->endElement();
+    }
+    if (isset($mappe['saksansvarlig'])) {
+        $xml->startElement('saksansvarlig');
+        $xml->text($mappe['saksansvarlig']);
+        $xml->endElement();
+    }
+    if (isset($mappe['saksstatus'])) {
+        $xml->startElement('saksstatus');
+        $xml->text($mappe['saksstatus']);
+        $xml->endElement();
     }
     $xml->endElement();
 }
