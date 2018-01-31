@@ -28,6 +28,7 @@ type curl >/dev/null 2>&1 || { echo >&2 "runparser requires curl, but it's not i
 curl -s https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/arkivstruktur.xml | xmllint --format - >n5uttrekk-arkivstruktur.xml
 
 php noark5-parser.php n5uttrekk-arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
+java noark5_parser n5uttrekk-arkivstruktur.xml http://localhost:8092/noark5v4/ admin password
 
 #curl -s https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/loependeJournal.xml | xmllint --format - >n5uttrekk-loependeJournal.xml
 #curl -s https://raw.githubusercontent.com/KDRS-SA/noark5-validator/master/src/resources/test-uttrekk/uttrekk1/n5uttrekk/offentligJournal.xml | xmllint --format - >n5uttrekk-offentligJournal.xml
