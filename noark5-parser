@@ -432,12 +432,22 @@ if __name__ == '__main__':
   stack = inspect.stack()
   for s in stack:
     if s[1] == "./noark5-export":
-      p = Endpoint("https://nikita.hioa.no/noark5v4/")
+      p = Endpoint("https://arkivarium.no/noark5v4/")
       t.noark5_export
-      p.login("s133298@oslomet.no", "password")
-      baserel = "https://nikita.hioa.no/noark5v4/hateoas-api"
-      r = p.json_get("%s/arkivstruktur/arkiv" % baserel)
-      print (r)
+      p.login("admin@localhost", "password")
+      baserel = "https://arkivarium.no/noark5v4/hateoas-api"
+      arkiv = p.json_get("%s/arkivstruktur/arkiv/" % baserel)
+      print (arkiv)
+      arkivdel = p.json_get("%s/arkivstruktur/arkivdel/" % baserel)
+      print (arkivdel)
+      saksmappe = p.json_get("%s/sakarkiv/saksmappe/" % baserel)
+      print (saksmappe)
+      journalpost = p.json_get("%s/sakarkiv/journalpost/" % baserel)
+      print (journalpost)
+      dokumentbeskrivelse = p.json_get("%s/arkivstruktur/dokumentbeskrivelse/" % baserel)
+      print (dokumentbeskrivelse)
+      dokumentobjekt = p.json_get("%s/arkivstruktur/dokumentobjekt/" % baserel)
+      print (dokumentobjekt)
     if s[1] == "./noark5-import":
       t.noark5_import
     if s[1] == "./noark5-verify":
