@@ -29,7 +29,7 @@ export, import or verify Noark 5 archive files.
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 program = "noark5"
-version = "0.1.0 (2018-11-14)"
+version = "0.1.1 (2018-11-19)"
 git_url = "https://github.com/oleaamot/noark5-parser.git"
 
 import sys
@@ -52,6 +52,8 @@ import urllib2
 import urllib3
 import urlparse
 import xml.etree.ElementTree
+import lxml
+from lxml import builder
 
 noarkrelbase = 'http://rel.kxml.no/noark5/v4/api/'
 nikitarelbase = 'http://nikita.arkivlab.no/noark5/v4/'
@@ -236,12 +238,16 @@ class LoginFailure(RuntimeError):
     """Report a login failure"""
     pass
 
+class XMLNamespace:
+          noark = "http://www.arkivverket.no/standarder/noark5/arkivstruktur"
+          xsi = "http://www.w3.org/2001/XMLSchema-instance"
+          n5mdk = "http://www.arkivverket.no/standarder/noark5/metadatakatalog"
+
 class Endpoint:
     def __init__(self, baseurl):
         self.baseurl = baseurl
         self._browser = mechanize.Browser()
         self.verbose = False
-
     def expandurl(self, path):
 #        print(self.baseurl, path)
         if path is None:
@@ -430,6 +436,14 @@ Recursively look for relation in API.
 if __name__ == '__main__':
   t = Noark5Parser()
   stack = inspect.stack()
+  dummydato = '1970-01-01T00:00:00'
+  E = lxml.builder.ElementMaker(
+          nsmap={
+                  None: XMLNamespace.noark,
+                  'xsi': XMLNamespace.xsi,
+                  'n5mdk': XMLNamespace.n5mdk,
+          }
+  )
   for s in stack:
     if s[1] == "./noark5-export":
       p = Endpoint("https://arkivarium.no/noark5v4/")
@@ -438,6 +452,83 @@ if __name__ == '__main__':
       baserel = "https://arkivarium.no/noark5v4/hateoas-api"
       arkiv = p.json_get("%s/arkivstruktur/arkiv/" % baserel)
       print (arkiv)
+      arkiv = E.arkiv(
+              E.systemID("https://arkivarium.no/noark5v4/"),
+              E.tittel('Saksarkiv for %s' % "https://arkivarium.no/noark5v4/"),
+              E.arkivstatus('Opprettet'), # FIXME or 'Avsluttet'
+              E.dokumentmedium('Elektronisk arkiv'),
+              E.opprettetDato(dummydato),
+              E.opprettetAv(''),
+              E.avsluttetDato(dummydato),
+              E.avsluttetAv(''),
+              E.arkivskaper(
+              E.arkivskaperID(''),
+              E.arkivskaperNavn(''),
+              ),
+      )
+      arkivdel = E.arkivdel(
+              E.systemID('systemID'),
+              E.tittel(u'tittel'),
+              E.beskrivelse('Description'),
+              E.arkivdelstatus('Aktiv periode'), # FIXME
+              E.opprettetDato(dummydato),
+              E.opprettetAv(''),
+              E.avsluttetDato(dummydato),
+              E.avsluttetAv(''),
+      )
+      mappe = E.mappe(
+              E.systemID('SystemID'),
+              E.mappeID('mappeID'),
+              E.tittel('Subject'),
+              E.opprettetDato('Created'),
+              E.opprettetAv("Creator"),
+              E.avsluttetDato('Created'),
+              E.avsluttetAv("Creator"),
+      )
+      reg = E.registrering(
+              E.systemID('registrering'),
+              # The event information was archived when it was created
+              E.opprettetDato('Created'),
+              E.opprettetAv('Creator'),
+              E.arkivertDato('Created'),
+              E.arkivertAv('Creator'),
+      )
+      db = E.dokumentbeskrivelse(
+              E.systemID(''),
+              E.dokumenttype(''),
+              E.dokumentstatus('Dokumentet er ferdigstilt'),
+              E.tittel('Tittel'),
+              E.opprettetDato(dummydato),
+              E.opprettetAv(''),
+              E.tilknyttetRegistreringSom('Hoveddokument'), # FIXME
+              E.dokumentnummer('Dokumentnummer'),
+              E.tilknyttetDato(dummydato),
+              E.tilknyttetAv(''),
+              E.dokumentobjekt(
+                      E.versjonsnummer('1'),
+                      E.variantformat('Produksjonsformat'),
+                      E.format('format'),
+                      E.opprettetDato(dummydato),
+                      E.opprettetAv(''),
+                      E.referanseDokumentfil('dokumentfil'),
+                      E.sjekksum('sha256'),
+                      E.sjekksumAlgoritme('SHA-256'),
+                      E.filstoerrelse(str('filesize')),
+              ),
+      )
+      reg.append(db)
+      # tags for basisregistrering must come after <dokumentbeskrivelse>
+      reg.append(E.registreringsID('id'))
+      reg.append(E.tittel('Description'))
+      mappe.append(reg)
+      arkivdel.append(mappe)
+      arkiv.append(arkivdel)
+
+      with open('arkivstruktur.xml', 'w') as f:
+              f.write(lxml.etree.tostring(arkiv,
+                                          pretty_print=True,
+                                          xml_declaration=True,
+                                          encoding='UTF-8'))
       arkivdel = p.json_get("%s/arkivstruktur/arkivdel/" % baserel)
       print (arkivdel)
       saksmappe = p.json_get("%s/sakarkiv/saksmappe/" % baserel)
