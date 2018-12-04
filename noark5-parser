@@ -459,19 +459,26 @@ if __name__ == '__main__':
       arkiv_v = json.loads(arkiv_p[i])
       print (arkiv_v['results'][i]['systemID'])
       for arkivref in arkiv_v['results']:
+              arkivskaper_p = p.json_get("%s/arkivstruktur/arkivskaper/" % baserel)
+              arkivskaper_v = json.loads(arkivskaper_p[i])
+              print (arkivskaper_v['results'][i]['arkivskaperID'])
+
               arkiv = E.arkiv(
                       E.systemID(arkiv_v['results'][i]['systemID']),
                       E.tittel(arkiv_v['results'][i]['tittel']),
+                      E.beskrivelse(arkiv_v['results'][i]['beskrivelse']),
                       E.arkivstatus(arkiv_v['results'][i]['arkivstatus']), # FIXME or 'Avsluttet'
                       E.dokumentmedium(arkiv_v['results'][i]['dokumentmedium']),
+#                      E.oppbevaringssted(arkiv_v['results'][i]['oppbevaringssted']),
                       E.opprettetDato(arkiv_v['results'][i]['opprettetDato']),
                       E.opprettetAv(arkiv_v['results'][i]['opprettetAv']),
 #                      E.avsluttetDato(arkiv_v['results'][i]['avsluttetDato']),
- #                     E.avsluttetAv(arkiv_v['results'][i]['avsluttetAv']),
+#                      E.avsluttetAv(arkiv_v['results'][i]['avsluttetAv']),
                       E.arkivskaper(
-#                              E.arkivskaperID(arkiv_v['results'][i]['arkivskaperid']),
- #                             E.arkivskaperNavn(arkiv_v['results'][i]['arkivskapernavn']),
-                ),
+                              E.arkivskaperID(arkivskaper_v['results'][i]['arkivskaperID']),
+                              E.arkivskaperNavn(arkivskaper_v['results'][i]['arkivskaperNavn']),
+                              E.beskrivelse(arkivskaper_v['results'][i]['beskrivelse']),
+                      ),
               )
               i = i + 1
               arkivdel_p = p.json_get("%s/arkivstruktur/arkivdel/" % baserel)
@@ -484,27 +491,40 @@ if __name__ == '__main__':
                               E.tittel(arkivdel_v['results'][j]['tittel']),
                               E.beskrivelse(arkivdel_v['results'][j]['beskrivelse']),
                               E.arkivdelstatus(arkivdel_v['results'][j]['arkivdelstatus']), # FIXME
+                              E.dokumentmedium(arkivdel_v['results'][j]['dokumentmedium']),
+#                              E.oppbevaringssted(arkivdel_v['results'][j]['oppbevaringssted']),
                               E.opprettetDato(arkivdel_v['results'][j]['opprettetDato']),
                               E.opprettetAv(arkivdel_v['results'][j]['opprettetAv']),
 #                              E.avsluttetDato(arkivdel_v['results'][j]['avsluttetDato']),
 #                              E.avsluttetAv(arkivdel_v['results'][j]['avsluttetAv']),
+#                              E.arkivperiodeStartDato(arkivdel_v['results'][j]['arkivperiodeStartDato']),
+#                              E.arkivperiodeSluttDato(arkivdel_v['results'][j]['arkivperiodeSluttDato']),
                       )
                       j = j + 1
+                      k = 0
+                      klassifikasjonssystem_p = p.json_get("%s/arkivstruktur/klassifikasjonssystem/" % baserel)
+                      klassifikasjonssystem_v = json.loads(klassifikasjonssystem_p[0])
+                      for klassifikasjonssystemref in klassifikasjonssystem_v['results']:
+                              print (klassifikasjonssystem_p)
+                              klassifikasjonssystem = E.klassifikasjonssystem(
+                                      E.systemID(klassifikasjonssystem_v['results'][k]['systemID']),
+                              )
+                              k = k + 1
                       mappe_p = p.json_get("%s/arkivstruktur/mappe/" % baserel)
                       mappe_v = json.loads(mappe_p[0])
-                      k = 0
+                      m = 0
                       for mapperef in mappe_v['results']:
                               print (mappe_p)
                               mappe = E.mappe(
-                                      E.systemID(mappe_v['results'][k]['systemID']),
-                                      E.mappeID(mappe_v['results'][k]['mappeID']),
-                                      E.tittel(mappe_v['results'][k]['tittel']),
-                                      E.opprettetDato(mappe_v['results'][k]['opprettetDato']),
-                                      E.opprettetAv(mappe_v['results'][k]['opprettetAv']),
-                                      E.avsluttetDato(mappe_v['results'][k]['avsluttetDato']),
-                                      E.avsluttetAv(mappe_v['results'][k]['avsluttetAv']),
+                                      E.systemID(mappe_v['results'][m]['systemID']),
+                                      E.mappeID(mappe_v['results'][m]['mappeID']),
+                                      E.tittel(mappe_v['results'][m]['tittel']),
+                                      E.opprettetDato(mappe_v['results'][m]['opprettetDato']),
+                                      E.opprettetAv(mappe_v['results'][m]['opprettetAv']),
+#                                      E.avsluttetDato(mappe_v['results'][m]['avsluttetDato']),
+#                                      E.avsluttetAv(mappe_v['results'][m]['avsluttetAv']),
                               )
-                              k = k + 1
+                              m = m + 1
                               reg = E.registrering(
                                       E.systemID('registrering'),
                                       # The event information was archived when it was created
@@ -541,9 +561,10 @@ if __name__ == '__main__':
                               reg.append(E.registreringsID('id'))
                               reg.append(E.tittel('Description'))
                               mappe.append(reg)
+#                              klassifikasjonssystem.append(reg)
                               arkivdel.append(mappe)
                               arkiv.append(arkivdel)
-      p
+
       with open('arkivstruktur.xml', 'w') as f:
               f.write(lxml.etree.tostring(arkiv,
                                           pretty_print=True,
@@ -568,7 +589,7 @@ if __name__ == '__main__':
               root = etree.fromstring(arkivet);
               o = xmltodict.parse(arkivet)
               jd = json.dumps(o)
-              arkiv = p.json_post("%s/arkivstruktur/ny-arkiv/" % baserel, "{}");
+              arkiv = p.json_post("%s/arkivstruktur/ny-arkiv/" % baserel, '{}');
               print arkiv
 #              arkiv = root.findall('arkivdel')
       t.noark5_export
