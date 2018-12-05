@@ -580,6 +580,7 @@ if __name__ == '__main__':
               #     print (dokumentobjekt)
     if s[1] == "./noark5-import":
       p = Endpoint("https://arkivarium.no/noark5v4/")
+      t.noark5_import
       p.login("admin@localhost", "password")
       baserel = "https://arkivarium.no/noark5v4/hateoas-api"
       ny_arkiv_p = p.json_get("%s/arkivstruktur/ny-arkiv/" % baserel)
