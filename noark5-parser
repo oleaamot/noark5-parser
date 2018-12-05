@@ -590,27 +590,46 @@ if __name__ == '__main__':
               o = xmltodict.parse(arkivet)
               jd = json.dumps(o)
               dd = json.loads(jd)
-              print dd['arkiv']['tittel']
+#              print dd
+#              print dd['arkiv']['tittel']
+#              print dd['arkiv']['arkivskaper']
     #          arkiv = p.json_post("%s/arkivstruktur/ny-arkiv/" % baserel, '{}');
      #         print arkiv
 
               try:
                       print("GET %s/arkivstruktur/ny-arkiv/" % baserel)
-                      (gc, gres) = p.json_get("%s/arkivstruktur/ny-arkiv/" % baserel)
-                      default = json.loads(gc)
-                      data = {};
-                      for k in default.keys():
-                              if not k == '_links' and k not in data:
-                                      data[k] = default[k]
+                      (arkiv_gc, gres) = p.json_get("%s/arkivstruktur/ny-arkiv/" % baserel)
+                      default_arkiv = json.loads(arkiv_gc)
+                      arkivdata = {};
+                      for k in default_arkiv.keys():
+                              if not k == '_links' and k not in arkivdata:
+                                      arkivdata[k] = default_arkiv[k]
+                      print("GET %s/arkivstruktur/ny-arkivskaper/" % baserel)
+                      (arkivskaper_gc, gres) = p.json_get("%s/arkivstruktur/ny-arkivskaper/" % baserel)
+                      default_arkivskaper = json.loads(arkivskaper_gc)
+                      arkivskaperdata = {};
+                      for k in default_arkivskaper.keys():
+                              if not k == '_links' and k not in arkivskaperdata:
+                                      arkivskaperdata[k] = default_arkivskaper[k]
               except urllib2.HTTPError, e:
                       pass
               try:
-                      datagrid = {};
-                      for key in data:
+                      arkivgrid = {};
+                      arkivdelgrid = {};
+                      arkivskapergrid = {};
+
+                      for key in arkivdata:
                               print dd['arkiv'][key]
-                              datagrid[key] = dd['arkiv'][key]
-                      print("POST: %s" % datagrid)
-                      (c, res) = p.json_post("%s/arkivstruktur/ny-arkiv/" % baserel, datagrid)
+                              arkivgrid[key] = dd['arkiv'][key]
+                      print("POST: %s" % arkivgrid)
+                      (c, res) = p.json_post("%s/arkivstruktur/ny-arkiv/" % baserel, arkivgrid)
+
+                      for key in arkivskaperdata:
+                              print dd['arkiv']['arkivskaper'][key]
+                              arkivskapergrid[key] = dd['arkiv']['arkivskaper'][key]
+                      print("POST: %s" % arkivskapergrid)
+                      (c, res) = p.json_post("%s/arkivstruktur/ny-arkivskaper/" % baserel, arkivskapergrid)
+
               except urllib2.HTTPError, e:
                       raise
               #              arkiv = root.findall('arkivdel')
