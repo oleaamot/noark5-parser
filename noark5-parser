@@ -460,7 +460,7 @@ if __name__ == '__main__':
       print (arkiv_v['results'][i]['systemID'])
       for arkivref in arkiv_v['results']:
               arkivskaper_p = p.json_get("%s/arkivstruktur/arkivskaper/" % baserel)
-              arkivskaper_v = json.loads(arkivskaper_p[i])
+              arkivskaper_v = json.loads(arkivskaper_p[0])
               print (arkivskaper_v['results'][i]['arkivskaperID'])
 
               arkiv = E.arkiv(
