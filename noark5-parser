@@ -29,7 +29,7 @@ export, import or verify Noark 5 archive files.
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 program = "noark5"
-version = "0.1.2 (2018-12-03)"
+version = "0.2.0 (2018-12-05)"
 git_url = "https://github.com/oleaamot/noark5-parser.git"
 
 import sys
@@ -589,9 +589,31 @@ if __name__ == '__main__':
               root = etree.fromstring(arkivet);
               o = xmltodict.parse(arkivet)
               jd = json.dumps(o)
-              arkiv = p.json_post("%s/arkivstruktur/ny-arkiv/" % baserel, '{}');
-              print arkiv
-#              arkiv = root.findall('arkivdel')
+              dd = json.loads(jd)
+              print dd['arkiv']['tittel']
+    #          arkiv = p.json_post("%s/arkivstruktur/ny-arkiv/" % baserel, '{}');
+     #         print arkiv
+
+              try:
+                      print("GET %s/arkivstruktur/ny-arkiv/" % baserel)
+                      (gc, gres) = p.json_get("%s/arkivstruktur/ny-arkiv/" % baserel)
+                      default = json.loads(gc)
+                      data = {};
+                      for k in default.keys():
+                              if not k == '_links' and k not in data:
+                                      data[k] = default[k]
+              except urllib2.HTTPError, e:
+                      pass
+              try:
+                      datagrid = {};
+                      for key in data:
+                              print dd['arkiv'][key]
+                              datagrid[key] = dd['arkiv'][key]
+                      print("POST: %s" % datagrid)
+                      (c, res) = p.json_post("%s/arkivstruktur/ny-arkiv/" % baserel, datagrid)
+              except urllib2.HTTPError, e:
+                      raise
+              #              arkiv = root.findall('arkivdel')
       t.noark5_export
     if s[1] == "./noark5-verify":
       t.noark5_verify
