@@ -191,7 +191,7 @@ class Noark5Parser:
         def __init__(self):
                 baseurl = 'http://localhost:8092/noark5v4/'
                 filename = 'arkivstruktur.xml'
-                username = 'admin@localhost';
+                username = 'root@localhost';
                 password = 'password';
                 refurl = 'http://n5test.kxml.no/api/'
                 parser = argparse.ArgumentParser()
@@ -449,10 +449,10 @@ if __name__ == '__main__':
 
   for s in stack:
     if s[1] == "./noark5-export":
-      p = Endpoint("https://arkivarium.no/noark5v4/")
+      p = Endpoint("https://nikita.hioa.no/noark5v4/")
       t.noark5_export
-      p.login("admin@localhost", "password")
-      baserel = "https://arkivarium.no/noark5v4/hateoas-api"
+      p.login("root@localhost", "password")
+      baserel = "https://nikita.hioa.no/noark5v4/hateoas-api"
       arkiv_p = p.json_get("%s/arkivstruktur/arkiv/" % baserel)
       print (arkiv_p)
       i = 0
@@ -581,7 +581,7 @@ if __name__ == '__main__':
     if s[1] == "./noark5-import":
       p = Endpoint("https://arkivarium.no/noark5v4/")
       t.noark5_import
-      p.login("admin@localhost", "password")
+      p.login("root@localhost", "password")
       baserel = "https://arkivarium.no/noark5v4/hateoas-api"
       ny_arkiv_p = p.json_get("%s/arkivstruktur/ny-arkiv/" % baserel)
       print ny_arkiv_p
