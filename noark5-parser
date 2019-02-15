@@ -12,7 +12,7 @@ export, import or verify Noark 5 archive files.
 #
 # noark5-parser (Python)
 #
-# Copyright (C) 2018  Ole Aamot
+# Copyright (C) 2018-2019  Ole Aamot
 #
 # Authors: Ole Aamot <ole@aamot.org>
 #
@@ -29,7 +29,7 @@ export, import or verify Noark 5 archive files.
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 program = "noark5"
-version = "0.2.0 (2018-12-05)"
+version = "0.2.1 (2019-02-15)"
 git_url = "https://github.com/oleaamot/noark5-parser.git"
 
 import sys
